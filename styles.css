@@ -1,6 +1,5 @@
 /* ====================================================
-   PORTFOLIO — Multi-Terminal Window Theme
-   Design tokens → layout → components → animations
+   PORTFOLIO — Multi-Terminal Window Theme + Sudo Admin Mode
    ==================================================== */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,7 +13,6 @@ body {
 }
 
 :root {
-  /* Ghostwriter / Terminal palette */
   --bg:        #0d0e12; 
   --bg-mid:    #111318;
   --bg-term:   #111318;
@@ -22,36 +20,29 @@ body {
   --bg-card:   #14171f;
   --bg-hover:  #1c202b;
 
-  /* Green accent */
   --green:     #4ade80;
   --green-dim: #22c55e;
   --green-glow:rgba(74,222,128,.18);
 
-  /* Text */
   --text:      #d1d5db;
   --text-dim:  #9ca3af;
   --text-muted:#6b7280;
   --text-ok:   #4ade80;
 
-  /* Prompt colors */
   --prompt-u:  #4ade80;
   --prompt-h:  #22c55e;
   --prompt-sym:#9ca3af;
 
-  /* Panel & Dock */
   --panel-h:   30px;
   --dock-w:    62px;
 
-  /* Border */
   --border:    rgba(255,255,255,.08);
   --border-green: rgba(74,222,128,.35);
 
-  /* Radius */
   --r-sm: 4px;
   --r-md: 8px;
   --r-lg: 12px;
 
-  /* Transition */
   --t: .2s ease;
   --t-slow: .4s ease;
 }
@@ -59,6 +50,108 @@ body {
 .muted  { color: var(--text-muted); }
 .small  { font-size: .82em; }
 .ok     { color: var(--text-ok); }
+
+/* ────────────────────────────────────────────────────
+   SUDO FLOATING ADMIN BAR
+──────────────────────────────────────────────────── */
+.sudo-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 42px;
+  background: rgba(20, 26, 20, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--green);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 4px 20px rgba(74,222,128,.2);
+  animation: slideDownBar .3s cubic-bezier(.34,1.3,.64,1);
+}
+@keyframes slideDownBar { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+.sudo-bar__info { display: flex; align-items: center; gap: 12px; }
+.sudo-bar__badge {
+  background: var(--green);
+  color: #000;
+  font-weight: 700;
+  font-size: .75rem;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: .05em;
+}
+.sudo-bar__hint { color: #ccc; font-size: .78rem; }
+
+.sudo-bar__actions { display: flex; gap: 8px; }
+.sudo-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--t), filter var(--t);
+}
+.sudo-btn:hover { transform: translateY(-1px); filter: brightness(1.15); }
+.sudo-btn--save  { background: var(--green); color: #05240c; }
+.sudo-btn--reset { background: #374151; color: #fff; }
+.sudo-btn--exit  { background: #991b1b; color: #fff; }
+
+/* Content Editable Highlight when Sudo Mode Active */
+body.sudo-active [contenteditable="true"] {
+  outline: 1px dashed rgba(74, 222, 128, 0.5);
+  outline-offset: 2px;
+  transition: outline-color var(--t), background var(--t);
+  cursor: text;
+}
+body.sudo-active [contenteditable="true"]:hover {
+  outline: 2px solid var(--green);
+  background: rgba(74, 222, 128, 0.06);
+  border-radius: 2px;
+}
+body.sudo-active [contenteditable="true"]:focus {
+  outline: 2px solid var(--green);
+  background: rgba(74, 222, 128, 0.1);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+}
+
+/* Adjust top panel padding when sudo bar is active */
+body.sudo-active .panel { top: 42px; }
+body.sudo-active .desktop { padding-top: calc(var(--panel-h) + 42px); }
+
+/* ────────────────────────────────────────────────────
+   SUDO PASSWORD MODAL
+──────────────────────────────────────────────────── */
+.sudo-modal {
+  width: min(440px, 92vw);
+}
+.sudo-modal__body {
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sudo-modal__msg { color: #fff; }
+.sudo-modal form { display: flex; gap: 10px; }
+.sudo-modal input {
+  flex: 1;
+  background: #101217;
+  border: 1px solid var(--border-green);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .9rem;
+  outline: none;
+}
+.sudo-modal input:focus { border-color: var(--green); box-shadow: 0 0 10px rgba(74,222,128,.3); }
+.sudo-modal__error { color: #ef4444; font-size: .78rem; background: rgba(239,68,68,.1); padding: 8px 12px; border-radius: 4px; border: 1px solid rgba(239,68,68,.3); }
+.sudo-modal__hint { color: #6b7280; font-size: .72rem; }
 
 /* ────────────────────────────────────────────────────
    BOOT SCREEN
@@ -72,8 +165,8 @@ body {
 .boot__grub { width: min(720px, 94vw); color: #ccc; font-size: clamp(.75rem, 1.5vw, .9rem); line-height: 1.6; }
 .grub__title { background: #20242d; color: #fff; padding: 2px 8px; margin-bottom: 8px; font-weight: 700; }
 .grub__menu { background: #111318; border: 1px solid #20242d; padding: 12px 0; margin-bottom: 20px; }
-.grub__item { padding: 3px 14px; color: #bbb; }
-.grub__item.is-sel { background: #20242d; color: #fff; }
+.grub__item { padding: 4px 14px; color: #bbb; cursor: pointer; }
+.grub__item:hover, .grub__item.is-sel { background: #20242d; color: #fff; }
 .grub__hint { color: #888; font-size: .8rem; }
 .grub__hint span { font-weight: 700; color: #ccc; }
 .boot__splash { display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -99,7 +192,7 @@ body {
   position: fixed; top: 0; left: 0; right: 0; height: var(--panel-h);
   background: rgba(17,19,24,.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.06);
   display: flex; align-items: center; gap: 0; z-index: 100; font-size: .8rem; padding: 0 12px;
-  opacity: 0; transform: translateY(-100%); transition: opacity .5s ease, transform .5s ease;
+  opacity: 0; transform: translateY(-100%); transition: opacity .5s ease, transform .5s ease, top var(--t);
 }
 .panel.visible { opacity: 1; transform: translateY(0); }
 .panel__activities { color: #ddd; font-weight: 500; padding: 0 10px; cursor: default; transition: background var(--t); }
@@ -129,11 +222,10 @@ body {
 .dock__ico:hover::before { opacity: 1; transform: translateY(-50%) scale(1); }
 .dock__sep { display: block; width: 30px; height: 1px; background: rgba(255,255,255,.12); margin: 4px 0; }
 
-/* Toast & Miniterm */
-.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(30,30,30,.97); border: 1px solid var(--border); border-left: 3px solid var(--green); color: #ddd; font-family: 'JetBrains Mono', monospace; font-size: .8rem; padding: 9px 18px; border-radius: var(--r-md); z-index: 500; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; white-space: nowrap; max-width: 90vw; }
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(30,30,30,.97); border: 1px solid var(--border); border-left: 3px solid var(--green); color: #ddd; font-family: 'JetBrains Mono', monospace; font-size: .8rem; padding: 9px 18px; border-radius: var(--r-md); z-index: 5000; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; white-space: nowrap; max-width: 90vw; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.miniterm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index: 600; display: flex; align-items: center; justify-content: center; animation: overlay-in .2s ease; }
+.miniterm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(5px); z-index: 6000; display: flex; align-items: center; justify-content: center; animation: overlay-in .2s ease; }
 .miniterm-overlay[hidden] { display: none; }
 @keyframes overlay-in { from{opacity:0} to{opacity:1} }
 .miniterm { width: min(600px, 92vw); background: var(--bg-card); border-radius: 10px; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08); animation: modal-in .25s; }
@@ -160,6 +252,7 @@ body {
 .desktop {
   padding-top: var(--panel-h); padding-left: var(--dock-w); min-height: 100vh;
   display: flex; flex-direction: column; align-items: center; gap: 24px; padding-bottom: 60px;
+  transition: padding-top var(--t);
 }
 
 .term {
@@ -184,9 +277,7 @@ body {
 .term__tabs-cv:hover { opacity: 1; }
 .term__body { padding: 24px 28px 30px; display: flex; flex-direction: column; gap: 6px; }
 
-/* ────────────────────────────────────────────────────
-   PROMPTS & COMMANDS
-──────────────────────────────────────────────────── */
+/* Prompts */
 .prompt { font-family: 'JetBrains Mono', monospace; font-size: .88rem; user-select: none; }
 .prompt .u { color: var(--prompt-u); font-weight: 700; }
 .prompt .at { color: var(--prompt-u); }
@@ -199,9 +290,7 @@ body {
 .out { font-size: .88rem; line-height: 1.75; color: #ccc; padding-left: 2px; margin-top: 4px; }
 .out b { color: #f0f0f0; }
 
-/* ────────────────────────────────────────────────────
-   SECTION TERMINAL CARDS (Independently Styled Windows)
-──────────────────────────────────────────────────── */
+/* Section Cards */
 .anchor-scroll { display: block; height: 0; margin-top: -50px; padding-top: 50px; visibility: hidden; }
 
 .sec-card {
@@ -215,63 +304,21 @@ body {
   transform: translateY(24px);
   transition: opacity .5s ease, transform .5s ease, border-color var(--t), box-shadow var(--t);
 }
-.sec-card.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-.sec-card:hover {
-  border-color: var(--border-green);
-  box-shadow: 0 16px 50px rgba(74,222,128,.08);
-}
+.sec-card.visible { opacity: 1; transform: translateY(0); }
+.sec-card:hover { border-color: var(--border-green); box-shadow: 0 16px 50px rgba(74,222,128,.08); }
 
-.sec-card__bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #181b22;
-  padding: 8px 14px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
-}
+.sec-card__bar { display: flex; align-items: center; gap: 10px; background: #181b22; padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,.06); }
 .sec-card__btns { display: flex; gap: 6px; }
-.sec-card__title {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .78rem;
-  color: var(--green);
-  font-weight: 500;
-}
+.sec-card__title { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--green); font-weight: 500; }
 .sec-card__spacer { flex: 1; }
-.sec-card__pid {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .68rem;
-  color: #555;
-}
+.sec-card__pid { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: #555; }
 
-.sec-card__body {
-  padding: 20px 24px;
-}
+.sec-card__body { padding: 20px 24px; }
+.sec-card__cmdline { font-family: 'JetBrains Mono', monospace; font-size: .88rem; color: #fff; display: flex; align-items: center; gap: 8px; min-height: 24px; }
+.sec-card__output { margin-top: 14px; animation: fadeInOutput .4s ease forwards; }
+@keyframes fadeInOutput { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-.sec-card__cmdline {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .88rem;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 24px;
-}
-
-.sec-card__output {
-  margin-top: 14px;
-  animation: fadeInOutput .4s ease forwards;
-}
-@keyframes fadeInOutput {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ────────────────────────────────────────────────────
-   HERO / CARDS CONTENT
-──────────────────────────────────────────────────── */
+/* Hero / Cards */
 .hero__name { font-family: 'Inter', sans-serif; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: #fff; letter-spacing: -.01em; margin-top: 6px; }
 .hero__name .muted { font-weight: 300; font-size: .7em; color: #888; }
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -328,18 +375,13 @@ body {
 .cert__badge { font-family: 'JetBrains Mono', monospace; font-size: .65rem; padding: 2px 7px; border-radius: 4px; background: rgba(255,255,255,.05); border: 1px solid var(--border); color: #777; }
 .cert__badge--ok { color: var(--green); border-color: var(--green-dim); background: rgba(74,222,128,.08); }
 
-/* ────────────────────────────────────────────────────
-   PROFESSIONAL CONTACT STYLING (Script Output Log)
-──────────────────────────────────────────────────── */
 .contact-out { font-family: 'JetBrains Mono', monospace; }
 .exec-log { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; border-left: 2px solid #282c37; padding-left: 12px; }
 .exec-line { display: flex; justify-content: space-between; font-size: .78rem; }
 .exec-dim { color: #777; }
 .exec-ok { color: var(--green); font-weight: 700; }
 
-.contact-manifest {
-  display: flex; flex-direction: column; gap: 6px; background: #101217; padding: 14px 16px; border-radius: var(--r-md); border: 1px solid var(--border); margin-bottom: 16px;
-}
+.contact-manifest { display: flex; flex-direction: column; gap: 6px; background: #101217; padding: 14px 16px; border-radius: var(--r-md); border: 1px solid var(--border); margin-bottom: 16px; }
 .manifest-row { display: flex; gap: 16px; font-size: .8rem; }
 .manifest-k { color: var(--green); font-weight: 700; width: 95px; flex-shrink: 0; }
 .manifest-v { color: #ccc; }
@@ -349,34 +391,19 @@ body {
 .contact__line a { color: var(--green); text-decoration: none; font-weight: 500; }
 .contact__line a:hover { color: #fff; text-decoration: underline; }
 
-/* ────────────────────────────────────────────────────
-   TECHY WGET RESUME STYLING
-──────────────────────────────────────────────────── */
 .wget-out { font-family: 'JetBrains Mono', monospace; font-size: .8rem; }
 .wget-log { display: flex; flex-direction: column; gap: 4px; }
 .wget-line { color: #9ca3af; }
 
-.wget-progress {
-  display: flex; align-items: center; gap: 12px; margin: 10px 0;
-  background: #101217; padding: 8px 12px; border-radius: var(--r-sm); border: 1px solid var(--border);
-}
-.progress-bar {
-  height: 8px; width: 0%; background: var(--green); border-radius: 4px;
-  box-shadow: 0 0 10px rgba(74,222,128,.5); transition: width .1s linear;
-}
+.wget-progress { display: flex; align-items: center; gap: 12px; margin: 10px 0; background: #101217; padding: 8px 12px; border-radius: var(--r-sm); border: 1px solid var(--border); }
+.progress-bar { height: 8px; width: 0%; background: var(--green); border-radius: 4px; box-shadow: 0 0 10px rgba(74,222,128,.5); transition: width .1s linear; }
 .progress-text { color: var(--green); font-weight: 700; font-size: .8rem; min-width: 40px; text-align: right; }
 
-.resume-btn {
-  display: inline-flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 20px;
-  background: rgba(74,222,128,.1); border: 1px solid var(--border-green); border-radius: var(--r-md);
-  color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: .88rem; font-weight: 700;
-  text-decoration: none; transition: background var(--t), transform var(--t); width: fit-content;
-}
+.resume-btn { display: inline-flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 20px; background: rgba(74,222,128,.1); border: 1px solid var(--border-green); border-radius: var(--r-md); color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: .88rem; font-weight: 700; text-decoration: none; transition: background var(--t), transform var(--t); width: fit-content; }
 .resume-btn:hover { background: rgba(74,222,128,.18); transform: translateY(-2px); }
 .resume-btn__dl { margin-left: auto; opacity: .7; animation: dl-bounce .8s infinite alternate; }
 @keyframes dl-bounce { from{transform:translateY(0)} to{transform:translateY(3px)} }
 
-/* Cursor & Scrollbar */
 .cursor { display: inline-block; color: var(--green); font-family: 'JetBrains Mono', monospace; animation: cursor-blink 1.1s step-start infinite; }
 @keyframes cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 

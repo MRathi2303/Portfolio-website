@@ -14,33 +14,68 @@
 </head>
 <body>
 
+  <!-- ===================== FLOATING SUDO ADMIN BAR ===================== -->
+  <div class="sudo-bar" id="sudo-bar" hidden>
+    <div class="sudo-bar__info">
+      <span class="sudo-bar__badge">⚡ SUDO ADMIN MODE</span>
+      <span class="sudo-bar__hint">Click any text on the page to edit directly</span>
+    </div>
+    <div class="sudo-bar__actions">
+      <button class="sudo-btn sudo-btn--save" id="sudo-save">💾 Save Changes</button>
+      <button class="sudo-btn sudo-btn--reset" id="sudo-reset">🔄 Reset Defaults</button>
+      <button class="sudo-btn sudo-btn--exit" id="sudo-exit">❌ Exit Sudo</button>
+    </div>
+  </div>
+
+  <!-- ===================== SUDO PASSWORD MODAL ===================== -->
+  <div class="miniterm-overlay" id="sudo-modal" hidden>
+    <div class="miniterm sudo-modal">
+      <header class="miniterm__bar">
+        <div class="miniterm__btns">
+          <span class="b close" id="sudo-modal-close"></span>
+          <span class="b min"></span><span class="b max"></span>
+        </div>
+        <div class="miniterm__title">sudo authentication — bash</div>
+      </header>
+      <div class="sudo-modal__body">
+        <div class="sudo-modal__msg">[sudo] password for moon:</div>
+        <form id="sudo-form" onsubmit="return false;">
+          <input type="password" id="sudo-pass-input" placeholder="Type password (default: admin)" autofocus />
+          <button type="submit" id="sudo-submit-btn" class="miniterm__btn miniterm__btn--mail">Authenticate</button>
+        </form>
+        <div class="sudo-modal__error" id="sudo-error" hidden>🔒 Access Denied: Incorrect password. Try 'admin'</div>
+        <div class="sudo-modal__hint">Hint: Password is <code class="ok">admin</code> (or press 'e' on GRUB screen)</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== BOOT SCREEN ===================== -->
   <div class="boot" id="boot">
     <div class="boot__grub" id="boot-grub">
       <div class="grub__title">GNU GRUB&nbsp;&nbsp;version 2.12</div>
       <div class="grub__menu">
-        <div class="grub__item is-sel">Portfolio OS</div>
-        <div class="grub__item">Portfolio OS (recovery mode)</div>
-        <div class="grub__item">Advanced options for Portfolio OS</div>
-        <div class="grub__item">Memory test (memtest86+x64)</div>
+        <div class="grub__item is-sel" data-grub="normal">Portfolio OS</div>
+        <div class="grub__item" data-grub="recovery" id="grub-recovery">Portfolio OS (recovery mode / sudo admin) ⚡</div>
+        <div class="grub__item" data-grub="normal">Advanced options for Portfolio OS</div>
+        <div class="grub__item" data-grub="normal">Memory test (memtest86+x64)</div>
       </div>
       <div class="grub__hint">
-        Use the ↑ and ↓ keys to select which entry is highlighted.<br>
-        Press enter to boot the selected OS. The highlighted entry will be<br>
-        booted automatically in <span id="grub-count">3</span>s.
+        Use ↑ and ↓ to select entry · Press <b>Enter</b> to boot.<br>
+        Press <b>'e'</b> to edit boot parameters &amp; launch <b>Sudo Admin Mode</b>.<br>
+        Booting in <span id="grub-count">3</span>s...
       </div>
     </div>
     <div class="boot__splash" id="boot-splash" hidden>
-      <div class="splash__brand">portfolio<span>-os</span></div>
+      <div class="splash__brand">portfolio<span id="splash-suffix">-os</span></div>
       <div class="splash__dots"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="splash__log" id="boot-log"></div>
     </div>
-    <div class="boot__skip">press any key or click to skip</div>
+    <div class="boot__skip">press any key / click to skip · press 'e' for sudo admin</div>
   </div>
 
   <!-- ===================== LEFT DOCK ===================== -->
   <aside class="dock" id="dock" aria-label="Application Launcher">
-    <button class="dock__ico" data-app="Files" data-toast="Permission denied: sudo not available." title="Files">
+    <button class="dock__ico" id="dock-files" data-app="Files" title="Files — Sudo Admin Control">
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <path d="M9 13h11l3.5 4H39a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V16a3 3 0 0 1 3-3z" fill="#d9822b"/>
         <rect x="6" y="20" width="36" height="18" rx="3" fill="#f3b34c"/>
@@ -61,10 +96,11 @@
         <line x1="23" y1="34" x2="33" y2="34" stroke="#4ade80" stroke-width="2.6" stroke-linecap="round"/>
       </svg>
     </button>
-    <button class="dock__ico" data-app="VS Code" data-toast="Opening VS Code..." title="VS Code">
+    <button class="dock__ico" id="dock-sudo" data-app="Sudo" title="⚡ Sudo Admin Mode">
       <svg viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="3" y="3" width="42" height="42" rx="11" fill="#1f6fb0"/>
-        <path d="M34 9.5l-15 11.5-6.5-5L9 18l5.8 6L9 30l3.5 2 6.5-5 15 11.5L40 36V12z M34 17.8v12.4L25.5 24z" fill="#fff"/>
+        <rect x="3" y="3" width="42" height="42" rx="11" fill="#20242d"/>
+        <path d="M24 10L14 18v12l10 8 10-8V18L24 10z" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="17" y="29" font-size="14" fill="#4ade80" font-family="monospace" font-weight="bold">#</text>
       </svg>
     </button>
     <span class="dock__sep"></span>
@@ -83,8 +119,7 @@
       <header class="miniterm__bar">
         <div class="miniterm__btns">
           <span class="b close" id="miniterm-close"></span>
-          <span class="b min"></span>
-          <span class="b max"></span>
+          <span class="b min"></span><span class="b max"></span>
         </div>
         <div class="miniterm__title">hire.sh — bash</div>
         <div class="miniterm__spacer"></div>
@@ -106,6 +141,7 @@
     <span class="panel__app" id="panel-app" role="button" tabindex="0" title="Run ./hire.sh">Terminal ▸</span>
     <span class="panel__clock" id="clock">--:--</span>
     <span class="panel__tray">
+      <span class="tray__ico" id="tray-sudo" title="Click to toggle Sudo Admin Mode" style="cursor:pointer;color:var(--green)">⚡ sudo</span>
       <span class="tray__ico" title="Network">▰</span>
       <span class="tray__ico" title="Sound">◂))</span>
       <span class="tray__ico" title="Power">⏻</span>
@@ -140,13 +176,13 @@
         <!-- whoami -->
         <div class="reveal-block">
           <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> whoami</div>
-          <p class="out hero__name">Moon&nbsp;Rathi <span class="muted">— Cloud Computing &amp; DevOps Enthusiast</span></p>
+          <p class="out hero__name" id="edit-hero-name">Moon&nbsp;Rathi <span class="muted" id="edit-hero-title">— Cloud Computing &amp; DevOps Enthusiast</span></p>
         </div>
 
         <!-- cat intro -->
         <div class="reveal-block">
           <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> cat intro.txt</div>
-          <p class="out">
+          <p class="out" id="edit-hero-bio">
             B.Tech CS student specializing in Cloud Computing with hands-on experience building cloud-native 
             applications and automated infrastructure on <b>AWS</b>. Experienced in <b>CI/CD pipelines</b> and 
             <b>Infrastructure as Code</b>—eager to build secure, scalable, production-ready systems.
@@ -173,14 +209,9 @@
           </div>
         </div>
 
-        <!-- last prompt in main window -->
         <div class="cmd cmd--last reveal-block"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span class="cursor">█</span></div>
       </div>
-    </section><!-- /term -->
-
-    <!-- ══════════════════════════════════════════════
-         SECTION TERMINAL CARDS
-    ══════════════════════════════════════════════ -->
+    </section>
 
     <!-- ── ABOUT ── -->
     <div id="about" class="anchor-scroll"></div>
@@ -198,17 +229,17 @@
         </div>
         <div class="sec-card__output" hidden>
           <div class="out about">
-            <p>
+            <p id="edit-about-text">
               I learned AWS primarily through hands-on projects — designing and deploying cloud infrastructure 
               while gaining practical experience with <b>Terraform, Docker, GitHub Actions,</b> and <b>Linux</b>. 
               I focus on building robust, automated pipelines and managing infrastructure securely.
             </p>
             <table class="kv">
-              <tr><td>role</td>    <td>Cloud Computing / DevOps</td></tr>
-              <tr><td>focus</td>   <td>AWS · IaC · CI/CD · Automation</td></tr>
-              <tr><td>university</td><td>IILM University, Greater Noida</td></tr>
-              <tr><td>location</td><td>Greater Noida, IN · Remote OK</td></tr>
-              <tr><td>status</td>  <td class="ok">🟢 open to work</td></tr>
+              <tr><td>role</td>    <td id="edit-about-role">Cloud Computing / DevOps</td></tr>
+              <tr><td>focus</td>   <td id="edit-about-focus">AWS · IaC · CI/CD · Automation</td></tr>
+              <tr><td>university</td><td id="edit-about-uni">IILM University, Greater Noida</td></tr>
+              <tr><td>location</td><td id="edit-about-loc">Greater Noida, IN · Remote OK</td></tr>
+              <tr><td>status</td>  <td class="ok" id="edit-about-status">🟢 open to work</td></tr>
             </table>
           </div>
         </div>
@@ -233,13 +264,12 @@
           <div class="out edu">
             <article class="edu__item">
               <div class="edu__head">
-                <span class="edu__degree">B.Tech — Computer Science &amp; Engineering</span>
-                <span class="edu__date">Aug 2023 – Present</span>
+                <span class="edu__degree" id="edit-edu-degree">B.Tech — Computer Science &amp; Engineering</span>
+                <span class="edu__date" id="edit-edu-date">Aug 2023 – Present</span>
               </div>
-              <div class="edu__inst">IILM University · Greater Noida, IN</div>
-              <p class="edu__detail"><b>Specialization:</b> Cloud Computing</p>
-              <p class="edu__detail"><b>GPA:</b> 8.07 / 10.0</p>
-              <p class="edu__detail muted small"># relevant: Distributed Systems · Cloud Architecture · Network Security · OS Internals</p>
+              <div class="edu__inst" id="edit-edu-inst">IILM University · Greater Noida, IN</div>
+              <p class="edu__detail"><b>Specialization:</b> <span id="edit-edu-spec">Cloud Computing</span></p>
+              <p class="edu__detail"><b>GPA:</b> <span id="edit-edu-gpa">8.07 / 10.0</span></p>
             </article>
           </div>
         </div>
@@ -264,10 +294,10 @@
           <div class="out projects">
             <a class="proj" href="https://github.com/MRathi2303" target="_blank" rel="noopener">
               <div class="proj__head">
-                <span class="proj__name">3-Tier AWS Architecture with Terraform</span>
+                <span class="proj__name" id="edit-p1-name">3-Tier AWS Architecture with Terraform</span>
                 <span class="proj__open">open ↗</span>
               </div>
-              <p class="proj__desc">High-availability 3-tier AWS architecture with modular Terraform across two AZs. Security-first routing via ALB → private EC2 → private RDS. Remote state management.</p>
+              <p class="proj__desc" id="edit-p1-desc">High-availability 3-tier AWS architecture with modular Terraform across two AZs. Security-first routing via ALB → private EC2 → private RDS. Remote state management.</p>
               <div class="proj__logos">
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" title="AWS" />
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform" title="Terraform" />
@@ -276,10 +306,10 @@
             </a>
             <a class="proj" href="https://github.com/MRathi2303" target="_blank" rel="noopener">
               <div class="proj__head">
-                <span class="proj__name">Serverless Receipt Processor</span>
+                <span class="proj__name" id="edit-p2-name">Serverless Receipt Processor</span>
                 <span class="proj__open">open ↗</span>
               </div>
-              <p class="proj__desc">Event-driven pipeline: S3 upload → Lambda → ECS Fargate (Dockerized Python) → DynamoDB + SES notification. Scale-to-zero cost model, CloudWatch monitoring.</p>
+              <p class="proj__desc" id="edit-p2-desc">Event-driven pipeline: S3 upload → Lambda → ECS Fargate (Dockerized Python) → DynamoDB + SES notification. Scale-to-zero cost model, CloudWatch monitoring.</p>
               <div class="proj__logos">
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" title="Python" />
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" title="Docker" />
@@ -288,10 +318,10 @@
             </a>
             <a class="proj" href="https://github.com/MRathi2303" target="_blank" rel="noopener">
               <div class="proj__head">
-                <span class="proj__name">AI-Assisted DevOps Utility</span>
+                <span class="proj__name" id="edit-p3-name">AI-Assisted DevOps Utility</span>
                 <span class="proj__open">open ↗</span>
               </div>
-              <p class="proj__desc">Auto-detects project stack → generates Dockerfiles via AWS Bedrock AI → CI/CD pipeline with GitHub Actions, OIDC auth, and Trivy vulnerability scanning at every stage.</p>
+              <p class="proj__desc" id="edit-p3-desc">Auto-detects project stack → generates Dockerfiles via AWS Bedrock AI → CI/CD pipeline with GitHub Actions, OIDC auth, and Trivy vulnerability scanning at every stage.</p>
               <div class="proj__logos">
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/githubactions/githubactions-original.svg" alt="GH Actions" title="GH Actions" />
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" title="Python" />
@@ -346,7 +376,7 @@
                 <span class="logo"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python"><i>Python</i></span>
               </div>
             </div>
-            <p class="muted small"># also: CloudWatch · Auto Scaling · IAM · SES · OIDC · Trivy · Kubernetes · AWS Bedrock</p>
+            <p class="muted small" id="edit-skills-more"># also: CloudWatch · Auto Scaling · IAM · SES · OIDC · Trivy · Kubernetes · AWS Bedrock</p>
           </div>
         </div>
       </div>
@@ -402,16 +432,16 @@
               <div class="exec-line"><span class="exec-dim">Resolving preferred contact vectors</span><span class="exec-ok">[  OK  ]</span></div>
             </div>
             <div class="contact-manifest">
-              <div class="manifest-row"><span class="manifest-k">STATUS</span><span class="manifest-v ok">🟢 Active — Open to full-time DevOps / Cloud roles &amp; internships</span></div>
-              <div class="manifest-row"><span class="manifest-k">RESPONSE</span><span class="manifest-v">&lt; 24 hours typical turnaround</span></div>
-              <div class="manifest-row"><span class="manifest-k">TIMEZONE</span><span class="manifest-v">IST (UTC +5:30) · Remote-first preferred</span></div>
-              <div class="manifest-row"><span class="manifest-k">PREFERRED</span><span class="manifest-v">Infrastructure · CI/CD · Cloud-native · Automation</span></div>
+              <div class="manifest-row"><span class="manifest-k">STATUS</span><span class="manifest-v ok" id="edit-status-text">🟢 Active — Open to full-time DevOps / Cloud roles &amp; internships</span></div>
+              <div class="manifest-row"><span class="manifest-k">RESPONSE</span><span class="manifest-v" id="edit-response-text">&lt; 24 hours typical turnaround</span></div>
+              <div class="manifest-row"><span class="manifest-k">TIMEZONE</span><span class="manifest-v" id="edit-timezone-text">IST (UTC +5:30) · Remote-first preferred</span></div>
+              <div class="manifest-row"><span class="manifest-k">PREFERRED</span><span class="manifest-v" id="edit-preferred-text">Infrastructure · CI/CD · Cloud-native · Automation</span></div>
             </div>
             <div class="contact-channels">
               <p class="muted small"># connect via:</p>
-              <p class="contact__line"><span class="muted">mail ──▶</span> <a href="mailto:moonrathi111@gmail.com">moonrathi111@gmail.com</a></p>
-              <p class="contact__line"><span class="muted">linkedin ─▶</span> <a href="https://linkedin.com/in/moon-rathi" target="_blank" rel="noopener">linkedin.com/in/moon-rathi</a></p>
-              <p class="contact__line"><span class="muted">github ───▶</span> <a href="https://github.com/MRathi2303" target="_blank" rel="noopener">github.com/MRathi2303</a></p>
+              <p class="contact__line"><span class="muted">mail ──▶</span> <a href="mailto:moonrathi111@gmail.com" id="edit-email-link">moonrathi111@gmail.com</a></p>
+              <p class="contact__line"><span class="muted">linkedin ─▶</span> <a href="https://linkedin.com/in/moon-rathi" target="_blank" rel="noopener" id="edit-linkedin-link">linkedin.com/in/moon-rathi</a></p>
+              <p class="contact__line"><span class="muted">github ───▶</span> <a href="https://github.com/MRathi2303" target="_blank" rel="noopener" id="edit-github-link">github.com/MRathi2303</a></p>
             </div>
           </div>
         </div>
@@ -449,7 +479,7 @@
             </div>
             <a class="resume-btn" href="#" download id="resume-dl-btn" style="display:none">
               <span class="resume-btn__ico">📄</span>
-              <span>Moon_Rathi_Resume.pdf</span>
+              <span id="edit-resume-filename">Moon_Rathi_Resume.pdf</span>
               <span class="resume-btn__dl">↓ download</span>
             </a>
           </div>
@@ -462,7 +492,7 @@
       <div class="cmd cmd--last"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span class="cursor">█</span></div>
     </div>
 
-  </main><!-- /desktop -->
+  </main>
 
   <script src="script.js"></script>
 </body>

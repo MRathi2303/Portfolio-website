@@ -34,6 +34,7 @@ const bootGrub   = document.getElementById('boot-grub');
 const bootSplash = document.getElementById('boot-splash');
 const grubCount  = document.getElementById('grub-count');
 const bootLog    = document.getElementById('boot-log');
+const grubRecovery = document.getElementById('grub-recovery');
 
 const panel      = document.getElementById('panel');
 const clock      = document.getElementById('clock');
@@ -48,19 +49,72 @@ const minitermActions = document.getElementById('miniterm-actions');
 const minitermClose   = document.getElementById('miniterm-close');
 const minitermDone    = document.getElementById('miniterm-done');
 
+const sudoBar       = document.getElementById('sudo-bar');
+const sudoSave      = document.getElementById('sudo-save');
+const sudoReset     = document.getElementById('sudo-reset');
+const sudoExit      = document.getElementById('sudo-exit');
+const sudoModal     = document.getElementById('sudo-modal');
+const sudoForm      = document.getElementById('sudo-form');
+const sudoPassInput = document.getElementById('sudo-pass-input');
+const sudoError     = document.getElementById('sudo-error');
+const sudoModalClose= document.getElementById('sudo-modal-close');
+const traySudo      = document.getElementById('tray-sudo');
+const dockSudo      = document.getElementById('dock-sudo');
+const dockFiles     = document.getElementById('dock-files');
+
 const toast      = document.getElementById('toast');
 
 let bootDone     = false;
 let toastTimer   = null;
 let hireRunning  = false;
+let isSudoMode   = false;
+let recoveryBoot = false;
+
+/* ════════════════════════════════════════════════════
+   EDITABLE ELEMENT IDS FOR SUDO MODE
+════════════════════════════════════════════════════ */
+const EDITABLE_IDS = [
+  'edit-hero-name',
+  'edit-hero-title',
+  'edit-hero-bio',
+  'edit-about-text',
+  'edit-about-role',
+  'edit-about-focus',
+  'edit-about-uni',
+  'edit-about-loc',
+  'edit-about-status',
+  'edit-edu-degree',
+  'edit-edu-date',
+  'edit-edu-inst',
+  'edit-edu-spec',
+  'edit-edu-gpa',
+  'edit-p1-name',
+  'edit-p1-desc',
+  'edit-p2-name',
+  'edit-p2-desc',
+  'edit-p3-name',
+  'edit-p3-desc',
+  'edit-skills-more',
+  'edit-status-text',
+  'edit-response-text',
+  'edit-timezone-text',
+  'edit-preferred-text',
+  'edit-email-link',
+  'edit-linkedin-link',
+  'edit-github-link',
+  'edit-resume-filename'
+];
+
+const LOCAL_STORAGE_KEY = 'moon_portfolio_sudo_data_v1';
 
 /* ════════════════════════════════════════════════════
    BOOT SEQUENCE
 ════════════════════════════════════════════════════ */
-function startBoot () {
+function startBoot (forceRecovery = false) {
   if (bootDone) return;
   bootDone = true;
   clearInterval(grubInterval);
+  if (forceRecovery) recoveryBoot = true;
   runSplash();
 }
 
@@ -78,6 +132,11 @@ function runSplash () {
   bootDone = true;
   if (bootGrub) bootGrub.hidden = true;
   if (bootSplash) bootSplash.hidden = false;
+
+  if (recoveryBoot) {
+    const splashSuffix = document.getElementById('splash-suffix');
+    if (splashSuffix) splashSuffix.textContent = '-os (sudo recovery)';
+  }
 
   let i = 0;
   const logInterval = setInterval(() => {
@@ -113,10 +172,157 @@ function revealDesktop () {
   initScrollSpy();
   initReveal();
   initSectionCardTypewriters();
+  loadSavedSudoContent();
+
+  if (recoveryBoot) {
+    enableSudoAdminMode();
+    showToast("⚡ Booted in Recovery Mode: Sudo Admin Mode active!");
+  }
 }
 
-document.addEventListener('keydown', () => startBoot(), { once: true });
-if (boot) boot.addEventListener('click', () => startBoot(), { once: true });
+/* Key listener on GRUB screen */
+document.addEventListener('keydown', (e) => {
+  if (!bootDone) {
+    if (e.key === 'e' || e.key === 'E') {
+      startBoot(true); // Press 'e' on GRUB to boot into recovery/sudo mode!
+    } else {
+      startBoot();
+    }
+  }
+});
+if (boot) boot.addEventListener('click', () => startBoot());
+if (grubRecovery) grubRecovery.addEventListener('click', (e) => {
+  e.stopPropagation();
+  startBoot(true);
+});
+
+/* ════════════════════════════════════════════════════
+   SUDO ADMIN MODE LOGIC
+════════════════════════════════════════════════════ */
+function openSudoModal () {
+  if (isSudoMode) {
+    showToast("⚡ Sudo Admin Mode is already active!");
+    return;
+  }
+  if (sudoModal) {
+    if (sudoError) sudoError.hidden = true;
+    if (sudoPassInput) sudoPassInput.value = '';
+    sudoModal.hidden = false;
+    setTimeout(() => { if (sudoPassInput) sudoPassInput.focus(); }, 100);
+  }
+}
+
+function closeSudoModal () {
+  if (sudoModal) sudoModal.hidden = true;
+}
+
+function authenticateSudo () {
+  const pass = sudoPassInput ? sudoPassInput.value.trim().toLowerCase() : '';
+  /* Accept 'admin', 'moon', 'sudo', or 'root' */
+  if (pass === 'admin' || pass === 'moon' || pass === 'sudo' || pass === 'root' || pass === '') {
+    closeSudoModal();
+    enableSudoAdminMode();
+    showToast("⚡ Authenticated! Sudo Admin Mode active. Click text to edit.");
+  } else {
+    if (sudoError) sudoError.hidden = false;
+  }
+}
+
+function enableSudoAdminMode () {
+  isSudoMode = true;
+  document.body.classList.add('sudo-active');
+  if (sudoBar) sudoBar.hidden = false;
+
+  EDITABLE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.contentEditable = 'true';
+    }
+  });
+}
+
+function disableSudoAdminMode () {
+  isSudoMode = false;
+  document.body.classList.remove('sudo-active');
+  if (sudoBar) sudoBar.hidden = true;
+
+  EDITABLE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.contentEditable = 'false';
+    }
+  });
+  showToast("Exit Sudo Admin Mode.");
+}
+
+function saveSudoContent () {
+  const data = {};
+  EDITABLE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      data[id] = el.innerHTML;
+    }
+  });
+
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    showToast("💾 Saved! Webpage changes persisted to LocalStorage.");
+  } catch (err) {
+    showToast("⚠️ Could not save to localStorage: " + err.message);
+  }
+}
+
+function loadSavedSudoContent () {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      Object.keys(data).forEach(id => {
+        const el = document.getElementById(id);
+        if (el && data[id]) {
+          el.innerHTML = data[id];
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Error loading saved sudo data", err);
+  }
+}
+
+function resetSudoContent () {
+  if (confirm("Reset all website content back to default code values?")) {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    location.reload();
+  }
+}
+
+/* Event listeners for Sudo Mode */
+if (sudoForm) {
+  sudoForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    authenticateSudo();
+  });
+}
+if (sudoModalClose) sudoModalClose.addEventListener('click', closeSudoModal);
+if (sudoSave) sudoSave.addEventListener('click', saveSudoContent);
+if (sudoReset) sudoReset.addEventListener('click', resetSudoContent);
+if (sudoExit) sudoExit.addEventListener('click', disableSudoAdminMode);
+
+if (traySudo) traySudo.addEventListener('click', openSudoModal);
+if (dockSudo) dockSudo.addEventListener('click', openSudoModal);
+if (dockFiles) dockFiles.addEventListener('click', openSudoModal);
+
+/* Keyboard Shortcut: Ctrl+Alt+S or Cmd+Alt+S toggles Sudo Modal */
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 's' || e.key === 'S')) {
+    e.preventDefault();
+    if (isSudoMode) {
+      disableSudoAdminMode();
+    } else {
+      openSudoModal();
+    }
+  }
+});
 
 /* ════════════════════════════════════════════════════
    CLOCK & DOCK & TOAST
@@ -215,9 +421,6 @@ if (minitermDone) minitermDone.addEventListener('click', closeHire);
 if (miniterm) {
   miniterm.addEventListener('click', e => { if (e.target === miniterm) closeHire(); });
 }
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && miniterm && !miniterm.hidden) closeHire();
-});
 
 /* ════════════════════════════════════════════════════
    SCROLLSPY
@@ -245,7 +448,7 @@ function initScrollSpy () {
 }
 
 /* ════════════════════════════════════════════════════
-   REVEAL BLOCKS (Hero items)
+   REVEAL BLOCKS
 ════════════════════════════════════════════════════ */
 function initReveal () {
   const blocks = document.querySelectorAll('.term .reveal-block, .end-cursor-wrap.reveal-block');
@@ -276,10 +479,8 @@ function initSectionCardTypewriters () {
         const card = entry.target;
         obs.unobserve(card);
 
-        /* 1. Make window visible */
         card.classList.add('visible');
 
-        /* 2. Type out command */
         const cmdText   = card.dataset.cmd || '';
         const typewriter= card.querySelector('.js-typewriter');
         const output     = card.querySelector('.sec-card__output');
@@ -290,16 +491,14 @@ function initSectionCardTypewriters () {
 
         function typeChar () {
           if (charIdx < cmdText.length) {
-            typewriter.textContent += cmdText.charAt(charIdx);
+            if (typewriter) typewriter.textContent += cmdText.charAt(charIdx);
             charIdx++;
             setTimeout(typeChar, typeSpeed);
           } else {
-            /* Finished typing command -> reveal output */
             setTimeout(() => {
               if (caret) caret.style.display = 'none';
               if (output) output.hidden = false;
 
-              /* If this is the wget/resume card, run progress bar */
               if (card.querySelector('#resume-progress')) {
                 runResumeWget();
               }
@@ -317,9 +516,6 @@ function initSectionCardTypewriters () {
   cards.forEach(c => obs.observe(c));
 }
 
-/* ════════════════════════════════════════════════════
-   WGET RESUME PROGRESS BAR ANIMATION
-════════════════════════════════════════════════════ */
 function runResumeWget () {
   const progressBar  = document.getElementById('resume-progress');
   const progressText = document.getElementById('progress-text');
