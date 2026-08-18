@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>moon@portfolio: ~</title>
+  <title>moon@blaze.portfolio: ~</title>
   <meta name="description" content="Moon Rathi — Cloud Computing Student & DevOps Enthusiast" />
   <meta name="author" content="Moon Rathi" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,14 +49,14 @@
     </div>
   </div>
 
-  <!-- ===================== BOOT SCREEN ===================== -->
+  <!-- ===================== BOOT SCREEN (blaze.portfolio os) ===================== -->
   <div class="boot" id="boot">
     <div class="boot__grub" id="boot-grub">
       <div class="grub__title">GNU GRUB&nbsp;&nbsp;version 2.12</div>
       <div class="grub__menu">
-        <div class="grub__item is-sel" data-grub="normal">Portfolio OS</div>
-        <div class="grub__item" data-grub="recovery" id="grub-recovery">Portfolio OS (recovery mode / sudo admin) ⚡</div>
-        <div class="grub__item" data-grub="normal">Advanced options for Portfolio OS</div>
+        <div class="grub__item is-sel" data-grub="normal">blaze.portfolio os</div>
+        <div class="grub__item" data-grub="recovery" id="grub-recovery">blaze.portfolio os (recovery mode / sudo admin) ⚡</div>
+        <div class="grub__item" data-grub="normal">Advanced options for blaze.portfolio os</div>
         <div class="grub__item" data-grub="normal">Memory test (memtest86+x64)</div>
       </div>
       <div class="grub__hint">
@@ -66,26 +66,19 @@
       </div>
     </div>
     <div class="boot__splash" id="boot-splash" hidden>
-      <div class="splash__brand">portfolio<span id="splash-suffix">-os</span></div>
+      <div class="splash__brand">blaze.portfolio<span id="splash-suffix"> os</span></div>
       <div class="splash__dots"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="splash__log" id="boot-log"></div>
     </div>
     <div class="boot__skip">press any key / click to skip · press 'e' for sudo admin</div>
   </div>
 
-  <!-- ===================== LEFT DOCK ===================== -->
+  <!-- ===================== LEFT DOCK (Cleaned Up - Single Sudo Control) ===================== -->
   <aside class="dock" id="dock" aria-label="Application Launcher">
     <button class="dock__ico" id="dock-files" data-app="Files" title="Files — Sudo Admin Control">
       <svg viewBox="0 0 48 48" aria-hidden="true">
         <path d="M9 13h11l3.5 4H39a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V16a3 3 0 0 1 3-3z" fill="#d9822b"/>
         <rect x="6" y="20" width="36" height="18" rx="3" fill="#f3b34c"/>
-      </svg>
-    </button>
-    <button class="dock__ico" data-app="Firefox" data-toast="Launching Firefox..." data-link="https://github.com/MRathi2303" title="GitHub">
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <defs><radialGradient id="ffg" cx="62%" cy="32%" r="78%"><stop offset="0%" stop-color="#ffe14d"/><stop offset="40%" stop-color="#ff7a1a"/><stop offset="78%" stop-color="#e83b2f"/><stop offset="100%" stop-color="#b81e8e"/></radialGradient></defs>
-        <circle cx="24" cy="24" r="20" fill="url(#ffg)"/>
-        <path d="M34 13c2.2 2.6 3 6 2.3 9.4-.7-2.9-2.6-4.7-5-5.3 2.9 2.6 3.6 7 1.4 10.8-1.9 3.3-5.9 4.8-9.5 3.6-2.6-.9-4.3-3.3-4.2-6 .9 1.7 2.7 2.3 4.3 1.6-3-.7-4.8-3.6-4-6.6.7-2.7 3.2-4.6 4.1-7.3.6-1.8.3-3.8-.8-5.3 3.9.6 7.4 2.7 9.6 5.9z" fill="#7a1f0a" opacity=".5"/>
       </svg>
     </button>
     <button class="dock__ico" id="dock-terminal" data-app="Terminal" title="Interactive Bash Console (Press ~ or click)">
@@ -94,13 +87,6 @@
         <rect x="5" y="7" width="38" height="8" rx="7" fill="#20242d"/>
         <path d="M13 23l6 5-6 5" fill="none" stroke="#4ade80" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
         <line x1="23" y1="34" x2="33" y2="34" stroke="#4ade80" stroke-width="2.6" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <button class="dock__ico" id="dock-sudo" data-app="Sudo" title="⚡ Sudo Admin Mode">
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="3" y="3" width="42" height="42" rx="11" fill="#20242d"/>
-        <path d="M24 10L14 18v12l10 8 10-8V18L24 10z" fill="none" stroke="#4ade80" stroke-width="2.5"/>
-        <text x="17" y="29" font-size="14" fill="#4ade80" font-family="monospace" font-weight="bold">#</text>
       </svg>
     </button>
     <span class="dock__sep"></span>
@@ -113,7 +99,7 @@
     </button>
   </aside>
 
-  <!-- ===================== FULLY INTERACTIVE BASH TERMINAL MODAL ===================== -->
+  <!-- ===================== INTERACTIVE BASH TERMINAL MODAL ===================== -->
   <div class="miniterm-overlay" id="interactive-term-modal" hidden>
     <div class="miniterm interactive-term">
       <header class="miniterm__bar">
@@ -127,20 +113,20 @@
       </header>
       <div class="interactive-term__body" id="interterm-body">
         <div class="interterm-welcome">
-          <span class="g">Portfolio Interactive Terminal v2.4</span><br/>
+          <span class="g">blaze.portfolio os — Interactive Terminal v2.4</span><br/>
           Type <span class="g">cd &lt;section&gt;</span> to navigate (e.g. <code class="ok">cd projects</code>, <code class="ok">cd skills</code>, <code class="ok">cd sudo</code>).<br/>
           Type <span class="g">help</span> to list all commands. Press <span class="g">Esc</span> or type <span class="g">exit</span> to close.
         </div>
         <div class="interterm-history" id="interterm-history"></div>
         <div class="interterm-input-line">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <input type="text" id="interterm-input" autocomplete="off" spellcheck="false" placeholder="Type a command (e.g. cd projects, sudo, help)..." autofocus />
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Old hire.sh popup kept for compatibility -->
+  <!-- hire.sh popup -->
   <div class="miniterm-overlay" id="miniterm" hidden>
     <div class="miniterm">
       <header class="miniterm__bar">
@@ -184,7 +170,7 @@
         <div class="term__btns">
           <span class="b close"></span><span class="b min"></span><span class="b max"></span>
         </div>
-        <div class="term__title">moon@portfolio: ~</div>
+        <div class="term__title">moon@blaze.portfolio: ~</div>
         <div class="term__spacer"></div>
         <span class="term__run">click to open interactive terminal ▸</span>
       </header>
@@ -202,13 +188,13 @@
       <div class="term__body">
         <!-- whoami -->
         <div class="reveal-block">
-          <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> whoami</div>
+          <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> whoami</div>
           <p class="out hero__name" id="edit-hero-name">Moon&nbsp;Rathi <span class="muted" id="edit-hero-title">— Cloud Computing &amp; DevOps Enthusiast</span></p>
         </div>
 
         <!-- cat intro -->
         <div class="reveal-block">
-          <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> cat intro.txt</div>
+          <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> cat intro.txt</div>
           <p class="out" id="edit-hero-bio">
             B.Tech CS student specializing in Cloud Computing with hands-on experience building cloud-native 
             applications and automated infrastructure on <b>AWS</b>. Experienced in <b>CI/CD pipelines</b> and 
@@ -223,7 +209,7 @@
 
         <!-- ls links -->
         <div class="reveal-block">
-          <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> ls ~/links</div>
+          <div class="cmd"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> ls ~/links</div>
           <div class="out socials">
             <a class="social" href="https://github.com/MRathi2303" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" class="social__svg gh"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
@@ -236,7 +222,7 @@
           </div>
         </div>
 
-        <div class="cmd cmd--last reveal-block"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span class="cursor">█</span></div>
+        <div class="cmd cmd--last reveal-block"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span class="cursor">█</span></div>
       </div>
     </section>
 
@@ -251,7 +237,7 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
@@ -284,7 +270,7 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
@@ -303,7 +289,7 @@
       </div>
     </div>
 
-    <!-- ── PROJECTS ── -->
+    <!-- ── PROJECTS (List View) ── -->
     <div id="projects" class="anchor-scroll"></div>
     <div class="sec-card js-card" data-cmd="ls -la ~/projects/" data-title="projects — bash">
       <div class="sec-card__bar">
@@ -314,11 +300,11 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
-          <div class="out projects">
+          <div class="out projects projects--list">
             <a class="proj" href="https://github.com/MRathi2303" target="_blank" rel="noopener">
               <div class="proj__head">
                 <span class="proj__name" id="edit-p1-name">3-Tier AWS Architecture with Terraform</span>
@@ -326,14 +312,14 @@
               </div>
               <p class="proj__desc" id="edit-p1-desc">High-availability 3-tier AWS architecture with modular Terraform across two AZs. Security-first routing via ALB → private EC2 → private RDS. Remote state management.</p>
               <div class="proj__logos">
-                <!-- Specific Service Icons -->
-                <span class="svc-icon svc-icon--ec2" title="AWS EC2">
+                <!-- Official AWS Service Icon SVGs -->
+                <span class="svc-icon svc-icon--ec2" title="AWS EC2 Elastic Compute">
                   <svg viewBox="0 0 24 24"><path fill="#FF9900" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
                 </span>
-                <span class="svc-icon svc-icon--alb" title="AWS ALB">
+                <span class="svc-icon svc-icon--alb" title="AWS ALB Application Load Balancer">
                   <svg viewBox="0 0 24 24"><path fill="#8C4FFF" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </span>
-                <span class="svc-icon svc-icon--rds" title="AWS RDS">
+                <span class="svc-icon svc-icon--rds" title="AWS RDS Relational Database">
                   <svg viewBox="0 0 24 24"><path fill="#2E27AD" d="M12 3c-4.97 0-9 1.79-9 4v10c0 2.21 4.03 4 9 4s9-1.79 9-4V7c0-2.21-4.03-4-9-4zm0 2c3.87 0 7 1.12 7 2s-3.13 2-7 2-7-1.12-7-2 3.13-2 7-2zm0 14c-3.87 0-7-1.12-7-2v-2.35c1.78.85 4.25 1.35 7 1.35s5.22-.5 7-1.35V17c0 .88-3.13 2-7 2z"/></svg>
                 </span>
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" alt="Terraform" title="Terraform" />
@@ -347,7 +333,7 @@
               </div>
               <p class="proj__desc" id="edit-p2-desc">Event-driven pipeline: S3 upload → Lambda → ECS Fargate (Dockerized Python) → DynamoDB + SES notification. Scale-to-zero cost model, CloudWatch monitoring.</p>
               <div class="proj__logos">
-                <span class="svc-icon svc-icon--s3" title="AWS S3 Bucket">
+                <span class="svc-icon svc-icon--s3" title="AWS S3 Simple Storage">
                   <svg viewBox="0 0 24 24"><path fill="#7AA116" d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V8h14v10zM7 10h10v2H7z"/></svg>
                 </span>
                 <span class="svc-icon svc-icon--lambda" title="AWS Lambda Serverless">
@@ -356,7 +342,7 @@
                 <span class="svc-icon svc-icon--ecs" title="AWS ECS Fargate Container">
                   <svg viewBox="0 0 24 24"><path fill="#E25241" d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.8l7 3.5v7l-7 3.5-7-3.5v-7l7-3.5z"/></svg>
                 </span>
-                <span class="svc-icon svc-icon--ddb" title="AWS DynamoDB">
+                <span class="svc-icon svc-icon--ddb" title="AWS DynamoDB NoSQL">
                   <svg viewBox="0 0 24 24"><path fill="#405BF5" d="M12 2C6.48 2 2 4.02 2 6.5v11C2 19.98 6.48 22 12 22s10-2.02 10-4.5v-11C22 4.02 17.52 2 12 2zm0 3c4.42 0 8 1.34 8 1.5S16.42 8 12 8 4 6.66 4 6.5 7.58 5 12 5z"/></svg>
                 </span>
                 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" title="Python" />
@@ -394,7 +380,7 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
@@ -475,7 +461,7 @@
       </div>
     </div>
 
-    <!-- ── CERTIFICATIONS ── -->
+    <!-- ── CERTIFICATIONS (List View) ── -->
     <div id="certs" class="anchor-scroll"></div>
     <div class="sec-card js-card" data-cmd="ls -lh ~/certs/ --sort=date" data-title="certs — bash">
       <div class="sec-card__bar">
@@ -486,11 +472,11 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
-          <div class="out certs">
+          <div class="out certs certs--list">
             <div class="cert"><div class="cert__icon">☁️</div><div class="cert__info"><span class="cert__name">Cloud Foundations</span><span class="cert__issuer">AWS Academy · Apr 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
             <div class="cert"><div class="cert__icon">🏅</div><div class="cert__info"><span class="cert__name">100 Days of Cloud (AWS)</span><span class="cert__issuer">KodeKloud · Apr 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
             <div class="cert"><div class="cert__icon">🚢</div><div class="cert__info"><span class="cert__name">Kubernetes Level 1</span><span class="cert__issuer">KodeKloud · Apr 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
@@ -513,7 +499,7 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
@@ -552,7 +538,7 @@
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
-          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
+          <span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span>
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
@@ -582,7 +568,7 @@
 
     <!-- End cursor -->
     <div class="end-cursor-wrap reveal-block">
-      <div class="cmd cmd--last"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span class="cursor">█</span></div>
+      <div class="cmd cmd--last"><span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span class="cursor">█</span></div>
     </div>
 
   </main>

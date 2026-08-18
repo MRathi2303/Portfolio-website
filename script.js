@@ -1,10 +1,10 @@
 'use strict';
 
 const BOOT_LINES = [
-  '[    0.000000] Booting Linux kernel 6.8.0-portfolio',
-  '[    0.001234] Command line: BOOT_IMAGE=/vmlinuz-6.8.0',
+  '[    0.000000] Booting Linux kernel 6.8.0-blaze',
+  '[    0.001234] Command line: BOOT_IMAGE=/vmlinuz-6.8.0-blaze',
   '[    0.124511] ACPI: Core revision 20230628',
-  '[    0.508200] systemd[1]: Starting Portfolio OS...',
+  '[    0.508200] systemd[1]: Starting blaze.portfolio os...',
   '[  OK  ] Started udev Kernel Device Manager',
   '[  OK  ] Started Journal Service',
   '[  OK  ] Reached target Local File Systems',
@@ -66,7 +66,6 @@ const sudoPassInput = document.getElementById('sudo-pass-input');
 const sudoError     = document.getElementById('sudo-error');
 const sudoModalClose= document.getElementById('sudo-modal-close');
 const traySudo      = document.getElementById('tray-sudo');
-const dockSudo      = document.getElementById('dock-sudo');
 const dockFiles     = document.getElementById('dock-files');
 
 const toast      = document.getElementById('toast');
@@ -115,7 +114,7 @@ const EDITABLE_IDS = [
 const LOCAL_STORAGE_KEY = 'moon_portfolio_sudo_data_v1';
 
 /* ════════════════════════════════════════════════════
-   BOOT SEQUENCE
+   BOOT SEQUENCE (blaze.portfolio os)
 ════════════════════════════════════════════════════ */
 function startBoot (forceRecovery = false) {
   if (bootDone) return;
@@ -142,14 +141,15 @@ function runSplash () {
 
   if (recoveryBoot) {
     const splashSuffix = document.getElementById('splash-suffix');
-    if (splashSuffix) splashSuffix.textContent = '-os (sudo recovery)';
+    if (splashSuffix) splashSuffix.textContent = ' os (sudo recovery)';
   }
 
   let i = 0;
+  /* Increased animation log interval by +20% (80ms -> 96ms) */
   const logInterval = setInterval(() => {
     if (i >= BOOT_LINES.length) {
       clearInterval(logInterval);
-      setTimeout(revealDesktop, 400);
+      setTimeout(revealDesktop, 480);
       return;
     }
     const line = document.createElement('div');
@@ -161,13 +161,13 @@ function runSplash () {
       bootLog.scrollTop = bootLog.scrollHeight;
     }
     i++;
-  }, 80);
+  }, 96);
 }
 
 function revealDesktop () {
   if (boot) {
     boot.classList.add('fade-out');
-    setTimeout(() => { boot.hidden = true; }, 500);
+    setTimeout(() => { boot.hidden = true; }, 600);
   }
 
   if (panel) panel.classList.add('visible');
@@ -209,7 +209,7 @@ if (grubRecovery) grubRecovery.addEventListener('click', (e) => {
 function openInteractiveTerminal () {
   if (interactiveTermModal) {
     interactiveTermModal.hidden = false;
-    setTimeout(() => { if (intertermInput) intertermInput.focus(); }, 100);
+    setTimeout(() => { if (intertermInput) intertermInput.focus(); }, 120);
   }
 }
 
@@ -229,7 +229,6 @@ function initInteractiveTerminal () {
     });
   }
 
-  /* Backtick ~ key toggles interactive CLI terminal */
   document.addEventListener('keydown', e => {
     if (e.key === '`' || e.key === '~') {
       e.preventDefault();
@@ -258,19 +257,17 @@ function executeCLICommand (cmdRaw) {
   const cmd = cmdRaw.trim();
   const lower = cmd.toLowerCase();
 
-  /* Create history entry */
   const entry = document.createElement('div');
   entry.className = 'interterm-history-entry';
 
   const cmdLine = document.createElement('div');
   cmdLine.className = 'interterm-cmd-line';
-  cmdLine.innerHTML = `<span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span>${escapeHtml(cmd)}</span>`;
+  cmdLine.innerHTML = `<span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">blaze.portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span>${escapeHtml(cmd)}</span>`;
   entry.appendChild(cmdLine);
 
   const outLine = document.createElement('div');
   outLine.className = 'interterm-out-line';
 
-  /* Command Routing */
   if (lower === 'help') {
     outLine.innerHTML = `Available CLI Commands:
   <span class="ok">cd &lt;section&gt;</span>  : Navigate to page section (e.g. cd projects, cd skills, cd top)
@@ -315,7 +312,7 @@ function executeCLICommand (cmdRaw) {
     outLine.innerHTML = `Moon Rathi — Cloud Computing Student & DevOps Enthusiast @ IILM University`;
   }
   else if (lower === 'neofetch') {
-    outLine.innerHTML = `OS      : Portfolio OS (Linux 6.8.0-portfolio)
+    outLine.innerHTML = `OS      : blaze.portfolio os (Linux 6.8.0-blaze)
 Host    : Moon Rathi Cloud Workstation
 Stack   : AWS, Terraform, Docker, Python, GitHub Actions, Linux
 Status  : 🟢 Active — Open to DevOps & Cloud Opportunities`;
@@ -360,7 +357,7 @@ function openSudoModal () {
     if (sudoError) sudoError.hidden = true;
     if (sudoPassInput) sudoPassInput.value = '';
     sudoModal.hidden = false;
-    setTimeout(() => { if (sudoPassInput) sudoPassInput.focus(); }, 100);
+    setTimeout(() => { if (sudoPassInput) sudoPassInput.focus(); }, 120);
   }
 }
 
@@ -459,7 +456,6 @@ if (sudoReset) sudoReset.addEventListener('click', resetSudoContent);
 if (sudoExit) sudoExit.addEventListener('click', disableSudoAdminMode);
 
 if (traySudo) traySudo.addEventListener('click', openSudoModal);
-if (dockSudo) dockSudo.addEventListener('click', openSudoModal);
 if (dockFiles) dockFiles.addEventListener('click', openSudoModal);
 
 document.addEventListener('keydown', (e) => {
@@ -517,8 +513,8 @@ function showToast (msg) {
   toast.classList.add('show');
   toastTimer = setTimeout(() => {
     toast.classList.remove('show');
-    setTimeout(() => { toast.hidden = true; }, 250);
-  }, 2800);
+    setTimeout(() => { toast.hidden = true; }, 300);
+  }, 3200);
 }
 
 /* ════════════════════════════════════════════════════
@@ -561,13 +557,13 @@ function initReveal () {
   }, { threshold: 0.08 });
 
   blocks.forEach((el, i) => {
-    el.style.transitionDelay = i < 4 ? `${i * 70}ms` : '0ms';
+    el.style.transitionDelay = i < 4 ? `${i * 84}ms` : '0ms'; /* +20% */
     obs.observe(el);
   });
 }
 
 /* ════════════════════════════════════════════════════
-   SECTION TERMINAL CARDS — TYPEWRITER & ANIMATION
+   SECTION TERMINAL CARDS — TYPEWRITER & ANIMATION (+20% duration)
 ════════════════════════════════════════════════════ */
 function initSectionCardTypewriters () {
   const cards = document.querySelectorAll('.js-card');
@@ -586,7 +582,8 @@ function initSectionCardTypewriters () {
         const caret      = card.querySelector('.js-caret');
 
         let charIdx = 0;
-        const typeSpeed = Math.max(30, Math.floor(600 / (cmdText.length || 1)));
+        /* Increased typewriter speed duration by +20% */
+        const typeSpeed = Math.max(36, Math.floor(720 / (cmdText.length || 1)));
 
         function typeChar () {
           if (charIdx < cmdText.length) {
@@ -601,11 +598,11 @@ function initSectionCardTypewriters () {
               if (card.querySelector('#resume-progress')) {
                 runResumeWget();
               }
-            }, 180);
+            }, 220);
           }
         }
 
-        setTimeout(typeChar, 250);
+        setTimeout(typeChar, 300);
       }
     });
   }, {
@@ -624,8 +621,9 @@ function runResumeWget () {
   if (!progressBar || !progressText) return;
 
   let pct = 0;
+  /* +20% slower progress bar steps */
   const interval = setInterval(() => {
-    pct += Math.floor(Math.random() * 18) + 12;
+    pct += Math.floor(Math.random() * 15) + 10;
     if (pct >= 100) {
       pct = 100;
       clearInterval(interval);
@@ -635,10 +633,10 @@ function runResumeWget () {
       setTimeout(() => {
         if (wgetDone) wgetDone.hidden = false;
         if (dlBtn) dlBtn.style.display = 'inline-flex';
-      }, 300);
+      }, 360);
     } else {
       progressBar.style.width = pct + '%';
       progressText.textContent = pct + '%';
     }
-  }, 100);
+  }, 120);
 }
