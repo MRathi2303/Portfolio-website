@@ -49,6 +49,17 @@ const minitermActions = document.getElementById('miniterm-actions');
 const minitermClose   = document.getElementById('miniterm-close');
 const minitermDone    = document.getElementById('miniterm-done');
 
+const certModal       = document.getElementById('cert-modal');
+const certModalClose  = document.getElementById('cert-modal-close');
+const certModalDone   = document.getElementById('cert-modal-done');
+const certIconDisplay = document.getElementById('cert-icon-display');
+const certNameDisplay = document.getElementById('cert-name-display');
+const certIssuerDisplay = document.getElementById('cert-issuer-display');
+const certCardTitle   = document.getElementById('cert-card-title');
+const certIdDisplay   = document.getElementById('cert-id-display');
+const certOrgDisplay  = document.getElementById('cert-org-display');
+const certVerifyLink  = document.getElementById('cert-verify-link');
+
 const interactiveTermModal = document.getElementById('interactive-term-modal');
 const intertermInput       = document.getElementById('interterm-input');
 const intertermHistory     = document.getElementById('interterm-history');
@@ -145,7 +156,6 @@ function runSplash () {
   }
 
   let i = 0;
-  /* Increased animation log interval by +20% (80ms -> 96ms) */
   const logInterval = setInterval(() => {
     if (i >= BOOT_LINES.length) {
       clearInterval(logInterval);
@@ -181,6 +191,7 @@ function revealDesktop () {
   initSectionCardTypewriters();
   loadSavedSudoContent();
   initInteractiveTerminal();
+  initCertModalViewer();
 
   if (recoveryBoot) {
     enableSudoAdminMode();
@@ -202,6 +213,49 @@ if (grubRecovery) grubRecovery.addEventListener('click', (e) => {
   e.stopPropagation();
   startBoot(true);
 });
+
+/* ════════════════════════════════════════════════════
+   CERTIFICATE VIEWER MODAL
+════════════════════════════════════════════════════ */
+function initCertModalViewer () {
+  const certItems = document.querySelectorAll('.js-cert-item');
+
+  certItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const name   = item.dataset.certName || 'Certificate';
+      const issuer = item.dataset.certIssuer || 'Issuer';
+      const date   = item.dataset.certDate || '';
+      const id     = item.dataset.certId || 'VERIFIED-CREDENTIAL';
+      const icon   = item.dataset.certIcon || '📜';
+      const link   = item.dataset.certLink || '#';
+
+      if (certIconDisplay) certIconDisplay.textContent = icon;
+      if (certNameDisplay) certNameDisplay.textContent = name;
+      if (certIssuerDisplay) certIssuerDisplay.textContent = `${issuer} · Issued ${date}`;
+      if (certCardTitle) certCardTitle.textContent = name;
+      if (certIdDisplay) certIdDisplay.textContent = id;
+      if (certOrgDisplay) certOrgDisplay.textContent = issuer;
+      if (certVerifyLink) certVerifyLink.href = link;
+
+      if (certModal) certModal.hidden = false;
+    });
+  });
+
+  if (certModalClose) certModalClose.addEventListener('click', closeCertModal);
+  if (certModalDone) certModalDone.addEventListener('click', closeCertModal);
+  if (certModal) {
+    certModal.addEventListener('click', e => {
+      if (e.target === certModal) closeCertModal();
+    });
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && certModal && !certModal.hidden) closeCertModal();
+  });
+}
+
+function closeCertModal () {
+  if (certModal) certModal.hidden = true;
+}
 
 /* ════════════════════════════════════════════════════
    INTERACTIVE BASH CLI COMMAND PARSER
@@ -557,13 +611,13 @@ function initReveal () {
   }, { threshold: 0.08 });
 
   blocks.forEach((el, i) => {
-    el.style.transitionDelay = i < 4 ? `${i * 84}ms` : '0ms'; /* +20% */
+    el.style.transitionDelay = i < 4 ? `${i * 84}ms` : '0ms';
     obs.observe(el);
   });
 }
 
 /* ════════════════════════════════════════════════════
-   SECTION TERMINAL CARDS — TYPEWRITER & ANIMATION (+20% duration)
+   SECTION TERMINAL CARDS — TYPEWRITER & ANIMATION
 ════════════════════════════════════════════════════ */
 function initSectionCardTypewriters () {
   const cards = document.querySelectorAll('.js-card');
@@ -582,7 +636,6 @@ function initSectionCardTypewriters () {
         const caret      = card.querySelector('.js-caret');
 
         let charIdx = 0;
-        /* Increased typewriter speed duration by +20% */
         const typeSpeed = Math.max(36, Math.floor(720 / (cmdText.length || 1)));
 
         function typeChar () {
@@ -621,7 +674,6 @@ function runResumeWget () {
   if (!progressBar || !progressText) return;
 
   let pct = 0;
-  /* +20% slower progress bar steps */
   const interval = setInterval(() => {
     pct += Math.floor(Math.random() * 15) + 10;
     if (pct >= 100) {

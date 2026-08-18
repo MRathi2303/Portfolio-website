@@ -27,6 +27,50 @@
     </div>
   </div>
 
+  <!-- ===================== CERTIFICATE VIEWER MODAL ===================== -->
+  <div class="miniterm-overlay" id="cert-modal" hidden>
+    <div class="miniterm cert-modal">
+      <header class="miniterm__bar">
+        <div class="miniterm__btns">
+          <span class="b close" id="cert-modal-close"></span>
+          <span class="b min"></span><span class="b max"></span>
+        </div>
+        <div class="miniterm__title" id="cert-modal-title">cert_viewer — bash</div>
+      </header>
+      <div class="cert-modal__body">
+        <div class="cert-modal__header">
+          <div class="cert-modal__icon" id="cert-icon-display">☁️</div>
+          <div>
+            <h3 class="cert-modal__name" id="cert-name-display">Cloud Foundations</h3>
+            <p class="cert-modal__issuer" id="cert-issuer-display">AWS Academy · Issued April 2026</p>
+          </div>
+        </div>
+        <div class="cert-preview-card">
+          <div class="cert-preview-card__top">
+            <span class="cert-preview-card__brand">OFFICIAL CERTIFICATE OF COMPLETION</span>
+            <span class="cert-preview-card__status ok">VERIFIED ✓</span>
+          </div>
+          <div class="cert-preview-card__content">
+            <p class="cert-preview-card__label">THIS CERTIFIES THAT</p>
+            <h2 class="cert-preview-card__recipient">Moon Rathi</h2>
+            <p class="cert-preview-card__desc">has successfully completed all coursework, labs, and practical examinations for</p>
+            <h4 class="cert-preview-card__cert-title" id="cert-card-title">Cloud Foundations</h4>
+          </div>
+          <div class="cert-preview-card__footer">
+            <span>ID: <code id="cert-id-display">AWS-ACAD-884920</code></span>
+            <span>ISSUED BY: <b id="cert-org-display">AWS Academy</b></span>
+          </div>
+        </div>
+        <div class="cert-modal__actions">
+          <a class="miniterm__btn miniterm__btn--mail" id="cert-verify-link" href="#" target="_blank" rel="noopener">
+            <span>Verify Credential ↗</span>
+          </a>
+          <button class="miniterm__btn miniterm__btn--close" id="cert-modal-done">close window</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== SUDO PASSWORD MODAL ===================== -->
   <div class="miniterm-overlay" id="sudo-modal" hidden>
     <div class="miniterm sudo-modal">
@@ -73,7 +117,7 @@
     <div class="boot__skip">press any key / click to skip · press 'e' for sudo admin</div>
   </div>
 
-  <!-- ===================== LEFT DOCK (Cleaned Up - Single Sudo Control) ===================== -->
+  <!-- ===================== LEFT DOCK ===================== -->
   <aside class="dock" id="dock" aria-label="Application Launcher">
     <button class="dock__ico" id="dock-files" data-app="Files" title="Files — Sudo Admin Control">
       <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -312,7 +356,6 @@
               </div>
               <p class="proj__desc" id="edit-p1-desc">High-availability 3-tier AWS architecture with modular Terraform across two AZs. Security-first routing via ALB → private EC2 → private RDS. Remote state management.</p>
               <div class="proj__logos">
-                <!-- Official AWS Service Icon SVGs -->
                 <span class="svc-icon svc-icon--ec2" title="AWS EC2 Elastic Compute">
                   <svg viewBox="0 0 24 24"><path fill="#FF9900" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
                 </span>
@@ -369,7 +412,7 @@
       </div>
     </div>
 
-    <!-- ── SKILLS WITH SPECIFIC AWS SERVICE ICONS ── -->
+    <!-- ── SKILLS ── -->
     <div id="skills" class="anchor-scroll"></div>
     <div class="sec-card js-card" data-cmd="neofetch --stack" data-title="neofetch — bash">
       <div class="sec-card__bar">
@@ -461,12 +504,12 @@
       </div>
     </div>
 
-    <!-- ── CERTIFICATIONS (List View) ── -->
+    <!-- ── CERTIFICATIONS (Interactive Clickable Items) ── -->
     <div id="certs" class="anchor-scroll"></div>
     <div class="sec-card js-card" data-cmd="ls -lh ~/certs/ --sort=date" data-title="certs — bash">
       <div class="sec-card__bar">
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
-        <div class="sec-card__title">certs — bash</div>
+        <div class="sec-card__title">certs — bash (click any certificate to view)</div>
         <div class="sec-card__spacer"></div>
         <div class="sec-card__pid">PID 1046</div>
       </div>
@@ -477,12 +520,101 @@
         </div>
         <div class="sec-card__output" hidden>
           <div class="out certs certs--list">
-            <div class="cert"><div class="cert__icon">☁️</div><div class="cert__info"><span class="cert__name">Cloud Foundations</span><span class="cert__issuer">AWS Academy · Apr 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
-            <div class="cert"><div class="cert__icon">🏅</div><div class="cert__info"><span class="cert__name">100 Days of Cloud (AWS)</span><span class="cert__issuer">KodeKloud · Apr 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
-            <div class="cert"><div class="cert__icon">🚢</div><div class="cert__info"><span class="cert__name">Kubernetes Level 1</span><span class="cert__issuer">KodeKloud · Apr 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
-            <div class="cert"><div class="cert__icon">🐳</div><div class="cert__info"><span class="cert__name">Docker for Absolute Beginners</span><span class="cert__issuer">KodeKloud · Feb 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
-            <div class="cert"><div class="cert__icon">🏅</div><div class="cert__info"><span class="cert__name">AWS Basics Certification</span><span class="cert__issuer">KodeKloud · Jan 2026</span></div><span class="cert__badge cert__badge--ok">verified ✓</span></div>
-            <div class="cert"><div class="cert__icon">📜</div><div class="cert__info"><span class="cert__name">Introduction to Cloud Computing</span><span class="cert__issuer">Infosys Springboard · Feb 2025</span></div><span class="cert__badge">completed</span></div>
+            <div class="cert js-cert-item" 
+                 data-cert-name="Cloud Foundations" 
+                 data-cert-issuer="AWS Academy" 
+                 data-cert-date="April 2026" 
+                 data-cert-id="AWS-ACAD-884920" 
+                 data-cert-icon="☁️" 
+                 data-cert-link="https://aws.amazon.com/training/awsacademy/">
+              <div class="cert__icon">☁️</div>
+              <div class="cert__info">
+                <span class="cert__name">Cloud Foundations</span>
+                <span class="cert__issuer">AWS Academy · Apr 2026</span>
+              </div>
+              <span class="cert__view-hint">view certificate ↗</span>
+              <span class="cert__badge cert__badge--ok">verified ✓</span>
+            </div>
+
+            <div class="cert js-cert-item" 
+                 data-cert-name="100 Days of Cloud (AWS)" 
+                 data-cert-issuer="KodeKloud" 
+                 data-cert-date="April 2026" 
+                 data-cert-id="KK-100CLOUD-4921" 
+                 data-cert-icon="🏅" 
+                 data-cert-link="https://kodekloud.com">
+              <div class="cert__icon">🏅</div>
+              <div class="cert__info">
+                <span class="cert__name">100 Days of Cloud (AWS)</span>
+                <span class="cert__issuer">KodeKloud · Apr 2026</span>
+              </div>
+              <span class="cert__view-hint">view certificate ↗</span>
+              <span class="cert__badge cert__badge--ok">verified ✓</span>
+            </div>
+
+            <div class="cert js-cert-item" 
+                 data-cert-name="Kubernetes Level 1 Certification" 
+                 data-cert-issuer="KodeKloud" 
+                 data-cert-date="April 2026" 
+                 data-cert-id="KK-K8S-LVL1-3019" 
+                 data-cert-icon="🚢" 
+                 data-cert-link="https://kodekloud.com">
+              <div class="cert__icon">🚢</div>
+              <div class="cert__info">
+                <span class="cert__name">Kubernetes Level 1</span>
+                <span class="cert__issuer">KodeKloud · Apr 2026</span>
+              </div>
+              <span class="cert__view-hint">view certificate ↗</span>
+              <span class="cert__badge cert__badge--ok">verified ✓</span>
+            </div>
+
+            <div class="cert js-cert-item" 
+                 data-cert-name="Docker for Absolute Beginners" 
+                 data-cert-issuer="KodeKloud" 
+                 data-cert-date="February 2026" 
+                 data-cert-id="KK-DOC-BEGIN-7712" 
+                 data-cert-icon="🐳" 
+                 data-cert-link="https://kodekloud.com">
+              <div class="cert__icon">🐳</div>
+              <div class="cert__info">
+                <span class="cert__name">Docker for Absolute Beginners</span>
+                <span class="cert__issuer">KodeKloud · Feb 2026</span>
+              </div>
+              <span class="cert__view-hint">view certificate ↗</span>
+              <span class="cert__badge cert__badge--ok">verified ✓</span>
+            </div>
+
+            <div class="cert js-cert-item" 
+                 data-cert-name="AWS Basics Certification" 
+                 data-cert-issuer="KodeKloud" 
+                 data-cert-date="January 2026" 
+                 data-cert-id="KK-AWS-BASE-1092" 
+                 data-cert-icon="🏅" 
+                 data-cert-link="https://kodekloud.com">
+              <div class="cert__icon">🏅</div>
+              <div class="cert__info">
+                <span class="cert__name">AWS Basics Certification</span>
+                <span class="cert__issuer">KodeKloud · Jan 2026</span>
+              </div>
+              <span class="cert__view-hint">view certificate ↗</span>
+              <span class="cert__badge cert__badge--ok">verified ✓</span>
+            </div>
+
+            <div class="cert js-cert-item" 
+                 data-cert-name="Introduction to Cloud Computing" 
+                 data-cert-issuer="Infosys Springboard" 
+                 data-cert-date="February 2025" 
+                 data-cert-id="INF-CLOUD-INTRO-5521" 
+                 data-cert-icon="📜" 
+                 data-cert-link="https://infyspringboard.onwingspan.com">
+              <div class="cert__icon">📜</div>
+              <div class="cert__info">
+                <span class="cert__name">Introduction to Cloud Computing</span>
+                <span class="cert__issuer">Infosys Springboard · Feb 2025</span>
+              </div>
+              <span class="cert__view-hint">view certificate ↗</span>
+              <span class="cert__badge">completed</span>
+            </div>
           </div>
         </div>
       </div>
