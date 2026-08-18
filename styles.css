@@ -1,5 +1,5 @@
 /* ====================================================
-   PORTFOLIO — Multi-Terminal Window Theme + Sudo Admin Mode
+   PORTFOLIO — Multi-Terminal Window Theme + Sudo Admin Mode + Interactive CLI
    ==================================================== */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -50,6 +50,114 @@ body {
 .muted  { color: var(--text-muted); }
 .small  { font-size: .82em; }
 .ok     { color: var(--text-ok); }
+
+/* ────────────────────────────────────────────────────
+   AWS SPECIFIC SERVICE SVG ICONS
+──────────────────────────────────────────────────── */
+.svc-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.04);
+  padding: 3px;
+  transition: transform var(--t), background var(--t);
+}
+.svc-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.svc-icon:hover {
+  transform: scale(1.18);
+  background: rgba(255,255,255,.1);
+}
+
+/* Specific AWS Accent Glows */
+.svc-icon--ec2     { background: rgba(255, 153, 0, 0.12); }
+.svc-icon--s3      { background: rgba(122, 161, 22, 0.12); }
+.svc-icon--lambda  { background: rgba(255, 153, 0, 0.15); }
+.svc-icon--ecs     { background: rgba(226, 82, 65, 0.12); }
+.svc-icon--alb     { background: rgba(140, 79, 255, 0.12); }
+.svc-icon--rds     { background: rgba(46, 39, 173, 0.15); }
+.svc-icon--ddb     { background: rgba(64, 91, 245, 0.15); }
+.svc-icon--bedrock { background: rgba(0, 164, 166, 0.15); }
+
+/* ────────────────────────────────────────────────────
+   INTERACTIVE BASH TERMINAL MODAL & CLI
+──────────────────────────────────────────────────── */
+.interactive-term {
+  width: min(720px, 94vw);
+  background: #111318;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-green);
+  box-shadow: 0 32px 80px rgba(0,0,0,.8), 0 0 40px rgba(74,222,128,.15);
+}
+
+.interactive-term__body {
+  padding: 18px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .85rem;
+  line-height: 1.6;
+  color: #d1d5db;
+  min-height: 280px;
+  max-height: 440px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.interterm-welcome {
+  color: #9ca3af;
+  margin-bottom: 14px;
+  font-size: .8rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  padding-bottom: 10px;
+}
+
+.interterm-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.interterm-history-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.interterm-cmd-line {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.interterm-out-line {
+  color: #cbd5e1;
+  padding-left: 4px;
+  white-space: pre-wrap;
+  font-size: .82rem;
+}
+
+.interterm-input-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.interterm-input-line input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .88rem;
+  outline: none;
+}
+.interterm-input-line input::placeholder {
+  color: #4b5563;
+}
 
 /* ────────────────────────────────────────────────────
    SUDO FLOATING ADMIN BAR
@@ -118,36 +226,18 @@ body.sudo-active [contenteditable="true"]:focus {
   box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
 }
 
-/* Adjust top panel padding when sudo bar is active */
 body.sudo-active .panel { top: 42px; }
 body.sudo-active .desktop { padding-top: calc(var(--panel-h) + 42px); }
 
 /* ────────────────────────────────────────────────────
    SUDO PASSWORD MODAL
 ──────────────────────────────────────────────────── */
-.sudo-modal {
-  width: min(440px, 92vw);
-}
-.sudo-modal__body {
-  padding: 20px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+.sudo-modal { width: min(440px, 92vw); }
+.sudo-modal__body { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: .85rem; display: flex; flex-direction: column; gap: 14px; }
 .sudo-modal__msg { color: #fff; }
 .sudo-modal form { display: flex; gap: 10px; }
 .sudo-modal input {
-  flex: 1;
-  background: #101217;
-  border: 1px solid var(--border-green);
-  border-radius: 6px;
-  padding: 8px 12px;
-  color: var(--green);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .9rem;
-  outline: none;
+  flex: 1; background: #101217; border: 1px solid var(--border-green); border-radius: 6px; padding: 8px 12px; color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: .9rem; outline: none;
 }
 .sudo-modal input:focus { border-color: var(--green); box-shadow: 0 0 10px rgba(74,222,128,.3); }
 .sudo-modal__error { color: #ef4444; font-size: .78rem; background: rgba(239,68,68,.1); padding: 8px 12px; border-radius: 4px; border: 1px solid rgba(239,68,68,.3); }
@@ -346,7 +436,7 @@ body.sudo-active .desktop { padding-top: calc(var(--panel-h) + 42px); }
 .proj__open { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--green); opacity: 0; transition: opacity var(--t); }
 .proj:hover .proj__open { opacity: 1; }
 .proj__desc { font-size: .82rem; color: #999; line-height: 1.6; flex: 1; }
-.proj__logos { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.proj__logos { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
 .proj__logos img { width: 22px; height: 22px; object-fit: contain; opacity: .8; transition: opacity var(--t); }
 .proj:hover .proj__logos img { opacity: 1; }
 

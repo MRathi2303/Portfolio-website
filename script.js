@@ -49,6 +49,13 @@ const minitermActions = document.getElementById('miniterm-actions');
 const minitermClose   = document.getElementById('miniterm-close');
 const minitermDone    = document.getElementById('miniterm-done');
 
+const interactiveTermModal = document.getElementById('interactive-term-modal');
+const intertermInput       = document.getElementById('interterm-input');
+const intertermHistory     = document.getElementById('interterm-history');
+const intertermClose       = document.getElementById('interterm-close');
+const intertermBody        = document.getElementById('interterm-body');
+const dockTerminal         = document.getElementById('dock-terminal');
+
 const sudoBar       = document.getElementById('sudo-bar');
 const sudoSave      = document.getElementById('sudo-save');
 const sudoReset     = document.getElementById('sudo-reset');
@@ -173,6 +180,7 @@ function revealDesktop () {
   initReveal();
   initSectionCardTypewriters();
   loadSavedSudoContent();
+  initInteractiveTerminal();
 
   if (recoveryBoot) {
     enableSudoAdminMode();
@@ -180,11 +188,10 @@ function revealDesktop () {
   }
 }
 
-/* Key listener on GRUB screen */
 document.addEventListener('keydown', (e) => {
   if (!bootDone) {
     if (e.key === 'e' || e.key === 'E') {
-      startBoot(true); // Press 'e' on GRUB to boot into recovery/sudo mode!
+      startBoot(true);
     } else {
       startBoot();
     }
@@ -195,6 +202,151 @@ if (grubRecovery) grubRecovery.addEventListener('click', (e) => {
   e.stopPropagation();
   startBoot(true);
 });
+
+/* ════════════════════════════════════════════════════
+   INTERACTIVE BASH CLI COMMAND PARSER
+════════════════════════════════════════════════════ */
+function openInteractiveTerminal () {
+  if (interactiveTermModal) {
+    interactiveTermModal.hidden = false;
+    setTimeout(() => { if (intertermInput) intertermInput.focus(); }, 100);
+  }
+}
+
+function closeInteractiveTerminal () {
+  if (interactiveTermModal) interactiveTermModal.hidden = true;
+}
+
+function initInteractiveTerminal () {
+  if (panelApp) panelApp.addEventListener('click', openInteractiveTerminal);
+  if (dockTerminal) dockTerminal.addEventListener('click', openInteractiveTerminal);
+  if (termBar) termBar.addEventListener('click', openInteractiveTerminal);
+  if (intertermClose) intertermClose.addEventListener('click', closeInteractiveTerminal);
+
+  if (interactiveTermModal) {
+    interactiveTermModal.addEventListener('click', e => {
+      if (e.target === interactiveTermModal) closeInteractiveTerminal();
+    });
+  }
+
+  /* Backtick ~ key toggles interactive CLI terminal */
+  document.addEventListener('keydown', e => {
+    if (e.key === '`' || e.key === '~') {
+      e.preventDefault();
+      if (interactiveTermModal && !interactiveTermModal.hidden) {
+        closeInteractiveTerminal();
+      } else {
+        openInteractiveTerminal();
+      }
+    }
+  });
+
+  if (intertermInput) {
+    intertermInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const cmd = intertermInput.value.trim();
+        intertermInput.value = '';
+        if (cmd) {
+          executeCLICommand(cmd);
+        }
+      }
+    });
+  }
+}
+
+function executeCLICommand (cmdRaw) {
+  const cmd = cmdRaw.trim();
+  const lower = cmd.toLowerCase();
+
+  /* Create history entry */
+  const entry = document.createElement('div');
+  entry.className = 'interterm-history-entry';
+
+  const cmdLine = document.createElement('div');
+  cmdLine.className = 'interterm-cmd-line';
+  cmdLine.innerHTML = `<span class="prompt"><span class="u">moon</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="p">~</span><span class="d">$</span></span> <span>${escapeHtml(cmd)}</span>`;
+  entry.appendChild(cmdLine);
+
+  const outLine = document.createElement('div');
+  outLine.className = 'interterm-out-line';
+
+  /* Command Routing */
+  if (lower === 'help') {
+    outLine.innerHTML = `Available CLI Commands:
+  <span class="ok">cd &lt;section&gt;</span>  : Navigate to page section (e.g. cd projects, cd skills, cd top)
+  <span class="ok">cat &lt;file&gt;</span>     : Scroll to section (e.g. cat about, cat education)
+  <span class="ok">sudo / su</span>       : Open Sudo Admin password prompt / enable admin mode
+  <span class="ok">ls</span>              : List all page directories/sections
+  <span class="ok">whoami</span>          : Display user identity
+  <span class="ok">neofetch</span>        : Display tech stack info
+  <span class="ok">clear</span>           : Clear terminal screen output
+  <span class="ok">exit</span>            : Close interactive terminal console`;
+  }
+  else if (lower === 'ls') {
+    outLine.innerHTML = `<span class="ok">about/</span>  <span class="ok">education/</span>  <span class="ok">projects/</span>  <span class="ok">skills/</span>  <span class="ok">certs/</span>  <span class="ok">contact/</span>  <span class="ok">resume.pdf</span>`;
+  }
+  else if (lower.startsWith('cd ') || lower.startsWith('goto ')) {
+    const target = lower.split(' ')[1] || '';
+    if (['about','education','projects','skills','certs','contact','resume','top'].includes(target)) {
+      outLine.innerHTML = `Navigating to section <span class="ok">#${target}</span>...`;
+      scrollToSection(target);
+      setTimeout(closeInteractiveTerminal, 600);
+    } else {
+      outLine.innerHTML = `<span style="color:#ef4444">cd: no such file or directory: ${escapeHtml(target)}</span>. Type 'ls' to see sections.`;
+    }
+  }
+  else if (lower.startsWith('cat ')) {
+    const target = lower.split(' ')[1] || '';
+    const clean = target.replace('.md','').replace('.txt','');
+    if (['about','education','projects','skills','certs','contact','resume'].includes(clean)) {
+      outLine.innerHTML = `Displaying <span class="ok">#${clean}</span>...`;
+      scrollToSection(clean);
+      setTimeout(closeInteractiveTerminal, 600);
+    } else {
+      outLine.innerHTML = `<span style="color:#ef4444">cat: ${escapeHtml(target)}: No such file or directory</span>`;
+    }
+  }
+  else if (lower === 'sudo' || lower === 'sudo su' || lower === 'sudo edit' || lower === 'su') {
+    outLine.innerHTML = `Launching <span class="ok">Sudo Admin Authentication</span>...`;
+    closeInteractiveTerminal();
+    openSudoModal();
+  }
+  else if (lower === 'whoami') {
+    outLine.innerHTML = `Moon Rathi — Cloud Computing Student & DevOps Enthusiast @ IILM University`;
+  }
+  else if (lower === 'neofetch') {
+    outLine.innerHTML = `OS      : Portfolio OS (Linux 6.8.0-portfolio)
+Host    : Moon Rathi Cloud Workstation
+Stack   : AWS, Terraform, Docker, Python, GitHub Actions, Linux
+Status  : 🟢 Active — Open to DevOps & Cloud Opportunities`;
+  }
+  else if (lower === 'clear') {
+    if (intertermHistory) intertermHistory.innerHTML = '';
+    return;
+  }
+  else if (lower === 'exit' || lower === 'quit') {
+    closeInteractiveTerminal();
+    return;
+  }
+  else {
+    outLine.innerHTML = `<span style="color:#ef4444">bash: command not found: ${escapeHtml(cmd)}</span>. Type '<span class="ok">help</span>' for commands or '<span class="ok">cd projects</span>' to navigate.`;
+  }
+
+  entry.appendChild(outLine);
+  if (intertermHistory) intertermHistory.appendChild(entry);
+  if (intertermBody) intertermBody.scrollTop = intertermBody.scrollHeight;
+}
+
+function scrollToSection (sectionId) {
+  const el = document.getElementById(sectionId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 /* ════════════════════════════════════════════════════
    SUDO ADMIN MODE LOGIC
@@ -218,7 +370,6 @@ function closeSudoModal () {
 
 function authenticateSudo () {
   const pass = sudoPassInput ? sudoPassInput.value.trim().toLowerCase() : '';
-  /* Accept 'admin', 'moon', 'sudo', or 'root' */
   if (pass === 'admin' || pass === 'moon' || pass === 'sudo' || pass === 'root' || pass === '') {
     closeSudoModal();
     enableSudoAdminMode();
@@ -296,7 +447,6 @@ function resetSudoContent () {
   }
 }
 
-/* Event listeners for Sudo Mode */
 if (sudoForm) {
   sudoForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -312,7 +462,6 @@ if (traySudo) traySudo.addEventListener('click', openSudoModal);
 if (dockSudo) dockSudo.addEventListener('click', openSudoModal);
 if (dockFiles) dockFiles.addEventListener('click', openSudoModal);
 
-/* Keyboard Shortcut: Ctrl+Alt+S or Cmd+Alt+S toggles Sudo Modal */
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 's' || e.key === 'S')) {
     e.preventDefault();
@@ -348,7 +497,7 @@ function initDock () {
       const link  = btn.dataset.link;
 
       if (app === 'Terminal') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        openInteractiveTerminal();
         return;
       }
       if (link) {
@@ -370,56 +519,6 @@ function showToast (msg) {
     toast.classList.remove('show');
     setTimeout(() => { toast.hidden = true; }, 250);
   }, 2800);
-}
-
-/* ════════════════════════════════════════════════════
-   MINITERM / HIRE.SH
-════════════════════════════════════════════════════ */
-function openHire () {
-  if (hireRunning || !miniterm) return;
-  hireRunning = true;
-  minitermOut.textContent = '';
-  minitermActions.hidden = true;
-  miniterm.hidden = false;
-
-  let i = 0;
-  function type () {
-    if (i >= HIRE_LINES.length) {
-      setTimeout(() => { minitermActions.hidden = false; }, 300);
-      hireRunning = false;
-      return;
-    }
-    const { t, s } = HIRE_LINES[i++];
-    const span = document.createElement('span');
-    if (t) span.className = t;
-    span.textContent = s + '\n';
-    minitermOut.appendChild(span);
-    minitermOut.scrollTop = minitermOut.scrollHeight;
-    setTimeout(type, s === '' ? 50 : 100);
-  }
-  type();
-}
-
-function closeHire () {
-  if (!miniterm) return;
-  miniterm.hidden = true;
-  hireRunning = false;
-  minitermOut.textContent = '';
-  minitermActions.hidden = true;
-}
-
-if (termBar) {
-  termBar.addEventListener('click', openHire);
-  termBar.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openHire(); });
-}
-if (panelApp) {
-  panelApp.addEventListener('click', openHire);
-  panelApp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openHire(); });
-}
-if (minitermClose) minitermClose.addEventListener('click', closeHire);
-if (minitermDone) minitermDone.addEventListener('click', closeHire);
-if (miniterm) {
-  miniterm.addEventListener('click', e => { if (e.target === miniterm) closeHire(); });
 }
 
 /* ════════════════════════════════════════════════════
