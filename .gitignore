@@ -4,3 +4,4 @@ node_modules/
 *.log
 portfolio-fullstack/
 assets/
+.env*
