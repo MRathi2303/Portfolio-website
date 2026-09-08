@@ -41,10 +41,45 @@
     <div class="sudo-bar__actions">
       <button class="sudo-btn sudo-btn--upload" id="sudo-upload-resume-btn">📄 Update Resume</button>
       <button class="sudo-btn sudo-btn--addcert" id="sudo-add-cert-btn">📜 Add Certificate</button>
-      <button class="sudo-btn sudo-btn--github" id="sudo-github-sync-btn">🐙 GitHub Sync</button>
       <button class="sudo-btn sudo-btn--save" id="sudo-save">💾 Save Edits</button>
       <button class="sudo-btn sudo-btn--reset" id="sudo-reset">🔄 Reset</button>
       <button class="sudo-btn sudo-btn--exit" id="sudo-exit">❌ Exit</button>
+    </div>
+  </div>
+
+  <!-- ===================== PROJECT EDIT MODAL ===================== -->
+  <div class="miniterm-overlay" id="project-edit-modal" hidden>
+    <div class="miniterm sudo-project-modal">
+      <header class="miniterm__bar">
+        <div class="miniterm__btns">
+          <span class="b close" id="project-edit-modal-close"></span>
+          <span class="b min"></span><span class="b max"></span>
+        </div>
+        <div class="miniterm__title">sudo project_manager — edit project</div>
+      </header>
+      <div class="sudo-modal__body">
+        <form id="project-edit-form">
+          <input type="hidden" id="project-input-id" />
+          <div class="sudo-form-grid">
+            <div class="sudo-field sudo-field--full">
+              <label>Project Name *</label>
+              <input type="text" id="project-input-name" required />
+            </div>
+            <div class="sudo-field sudo-field--full">
+              <label>Description *</label>
+              <textarea id="project-input-description" rows="5" required></textarea>
+            </div>
+            <div class="sudo-field sudo-field--full">
+              <label>Project Link *</label>
+              <input type="url" id="project-input-url" placeholder="https://github.com/..." required />
+            </div>
+          </div>
+          <div class="sudo-modal__actions">
+            <button type="submit" class="miniterm__btn miniterm__btn--mail">Save Project</button>
+            <button type="button" class="miniterm__btn miniterm__btn--close" id="project-edit-cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -68,12 +103,6 @@
             <span class="muted small">Replaces Moon_Rathi_Resume.pdf across all buttons</span>
           </div>
           <div class="dropzone-file-info" id="resume-file-info" hidden></div>
-        </div>
-        <div class="sudo-form-row">
-          <label class="sudo-checkbox-label">
-            <input type="checkbox" id="sync-resume-github" checked />
-            <span>Also commit directly to GitHub repository (auto-deploys to Vercel)</span>
-          </label>
         </div>
         <div class="sudo-modal__actions">
           <button class="miniterm__btn miniterm__btn--mail" id="save-resume-btn" disabled>Apply &amp; Save Resume</button>
@@ -126,44 +155,12 @@
               <input type="file" id="cert-file-input" accept="application/pdf,image/*" />
             </div>
           </div>
-          <div class="sudo-form-row">
-            <label class="sudo-checkbox-label">
-              <input type="checkbox" id="sync-cert-github" checked />
-              <span>Also commit certificate file to GitHub repo (auto-deploys to Vercel)</span>
-            </label>
-          </div>
           <div class="sudo-modal__actions">
             <button type="submit" class="miniterm__btn miniterm__btn--mail" id="save-cert-btn">Save Certificate</button>
             <button type="button" class="miniterm__btn miniterm__btn--close" id="cert-edit-cancel">Cancel</button>
           </div>
           <div class="sudo-status-msg" id="cert-upload-status" hidden></div>
         </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================== GITHUB TOKEN SETTINGS MODAL ===================== -->
-  <div class="miniterm-overlay" id="github-token-modal" hidden>
-    <div class="miniterm sudo-github-modal">
-      <header class="miniterm__bar">
-        <div class="miniterm__btns">
-          <span class="b close" id="github-modal-close"></span>
-          <span class="b min"></span><span class="b max"></span>
-        </div>
-        <div class="miniterm__title">sudo git_sync — GitHub 1-Click Live Deploy</div>
-      </header>
-      <div class="sudo-modal__body">
-        <div class="sudo-modal__msg">Configure GitHub Personal Access Token:</div>
-        <p class="small muted" style="line-height:1.6">
-          Enter a GitHub Personal Access Token (Fine-grained or classic with <code>repo</code> write permission). 
-          It is saved <b>only in your local browser</b>. With this token configured, clicking "Update Resume" or "Add Certificate" will directly commit to your repository on GitHub, triggering Vercel to redeploy globally in ~20 seconds!
-        </p>
-        <input type="password" id="github-pat-input" class="sudo-modal-pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx or github_pat_xxxx" />
-        <div class="sudo-modal__actions">
-          <button class="miniterm__btn miniterm__btn--mail" id="save-github-token-btn">Save &amp; Test Connection</button>
-          <button class="miniterm__btn miniterm__btn--close" id="github-modal-done">Close</button>
-        </div>
-        <div class="sudo-status-msg" id="github-token-status" hidden></div>
       </div>
     </div>
   </div>
@@ -228,11 +225,11 @@
       <div class="sudo-modal__body">
         <div class="sudo-modal__msg">[sudo] password for moon:</div>
         <form id="sudo-form" onsubmit="return false;">
-          <input type="password" id="sudo-pass-input" placeholder="Type password (default: admin)" autofocus />
+          <input type="password" id="sudo-pass-input" placeholder="Enter sudo password" autofocus />
           <button type="submit" id="sudo-submit-btn" class="miniterm__btn miniterm__btn--mail">Authenticate</button>
         </form>
-        <div class="sudo-modal__error" id="sudo-error" hidden>🔒 Access Denied: Incorrect password. Try 'admin'</div>
-        <div class="sudo-modal__hint">Hint: Password is <code class="ok">admin</code> (or press 'e' on GRUB screen)</div>
+        <div class="sudo-modal__error" id="sudo-error" hidden>Access denied.</div>
+        <div class="sudo-modal__hint">The sudo password is configured privately in the deployment environment.</div>
       </div>
     </div>
   </div>
@@ -423,7 +420,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">about.md — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1042</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -457,7 +453,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">experience.md — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1043</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -490,7 +485,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">education.md — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1044</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -520,7 +514,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">projects — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1045</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -601,7 +594,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">neofetch — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1046</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -683,7 +675,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">certs — bash (click any certificate to view)</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1047</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -691,7 +682,7 @@
           <span class="js-typewriter"></span><span class="cursor js-caret">█</span>
         </div>
         <div class="sec-card__output" hidden>
-          <div class="out certs certs--list">
+          <div class="out certs certs--list" id="certs-list">
 
             <div class="cert js-cert-item" 
                  data-cert-name="Claude Certified Architect – Foundations" 
@@ -785,7 +776,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">contact.sh — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1048</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">
@@ -825,7 +815,6 @@
         <div class="sec-card__btns"><span class="b close"></span><span class="b min"></span><span class="b max"></span></div>
         <div class="sec-card__title">wget — bash</div>
         <div class="sec-card__spacer"></div>
-        <div class="sec-card__pid">PID 1049</div>
       </div>
       <div class="sec-card__body">
         <div class="sec-card__cmdline">

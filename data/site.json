@@ -1,0 +1,126 @@
+{
+  "content": {
+    "edit-hero-name": "Moon&nbsp;Rathi <span class=\"muted\" id=\"edit-hero-title\" contenteditable=\"true\">— DevOps Engineering Intern &amp; Cloud Specialist</span>",
+    "edit-hero-title": "— DevOps Engineering Intern &amp; Cloud Specialist",
+    "edit-hero-bio": "DevOps Engineering Intern at <b>Mactores</b> and B.Tech CS student specializing in Cloud Computing. \n            I focus on designing resilient cloud infrastructure on <b>AWS</b>, automating provisioning with modular <b>Terraform</b>, \n            containerizing workloads with <b>Docker</b>, and setting up secure <b>CI/CD pipelines</b> that keep releases predictable.",
+    "edit-about-text": "I spend most of my time working at the intersection of cloud architecture and automation. \n              Currently interning at <b>Mactores</b> as a DevOps engineer, I've spent extensive time designing \n              production-style AWS environments with <b>Terraform</b>, building serverless and containerized micro-pipelines, \n              and exploring AI-assisted engineering workflows with tools like <b>Claude</b> and <b>Amazon Bedrock</b>.",
+    "edit-about-role": "DevOps Engineering Intern @ Mactores",
+    "edit-about-focus": "AWS · Terraform IaC · Docker · CI/CD · GenAI Workflows",
+    "edit-about-uni": "IILM University, Greater Noida",
+    "edit-about-loc": "Greater Noida, IN · Remote OK",
+    "edit-about-status": "🟢 Active (Open to DevOps &amp; Cloud roles)",
+    "edit-edu-degree": "B.Tech — Computer Science &amp; Engineering",
+    "edit-edu-date": "Aug 2023 – Present",
+    "edit-edu-inst": "IILM University · Greater Noida, IN",
+    "edit-edu-spec": "Cloud Computing",
+    "edit-edu-gpa": "8.02 CGPA",
+    "edit-p1-name": "Serverless Receipt Processor",
+    "edit-p1-desc": "Event-driven AWS pipeline where S3 uploads trigger Lambda to orchestrate a Dockerized Python container on ECS Fargate for structured extraction. Persists to DynamoDB with SES alerts and scales to zero compute cost when idle.",
+    "edit-p2-name": "AI-Assisted DevOps Utility",
+    "edit-p2-desc": "Automated repository analysis and Dockerfile generation pipeline using AWS Bedrock and ECR. Features context collection that auto-detects dependencies and runs GitHub Actions CI/CD with OIDC auth and Trivy vulnerability scans.",
+    "edit-p3-name": "3-Tier AWS Architecture with Terraform",
+    "edit-p3-desc": "Production-style multi-AZ architecture on AWS deployed with modular Terraform. Security-first routing through an ALB into private EC2 compute and private RDS subnets, with remote S3 state management and zero direct public database access.",
+    "edit-skills-more": "# also: CloudWatch · Auto Scaling · IAM · SES · OIDC Auth · Trivy · NAT Gateways",
+    "edit-status-text": "🟢 DevOps Intern @ Mactores — Open to Cloud &amp; DevOps opportunities",
+    "edit-response-text": "&lt; 24 hours typical turnaround",
+    "edit-timezone-text": "IST (UTC +5:30) · Remote / Greater Noida, IN",
+    "edit-preferred-text": "AWS · Terraform · Docker · CI/CD Pipelines · Linux",
+    "edit-email-link": "moonrathi111@gmail.com",
+    "edit-linkedin-link": "linkedin.com/in/moon-rathi",
+    "edit-github-link": "github.com/MRathi2303",
+    "edit-resume-filename": "Moon_Rathi_Resume.pdf"
+  },
+  "profile": {
+    "resumeUrl": "./Moon_Rathi_Resume.pdf",
+    "resumeFilename": "Moon_Rathi_Resume.pdf"
+  },
+  "links": {
+    "email": "moonrathi111@gmail.com",
+    "linkedin": "https://linkedin.com/in/moon-rathi",
+    "github": "https://github.com/MRathi2303"
+  },
+  "projects": [
+    {
+      "id": "p1",
+      "name": "Serverless Receipt Processor",
+      "description": "Event-driven AWS pipeline where S3 uploads trigger Lambda to orchestrate a Dockerized Python container on ECS Fargate for structured extraction. Persists to DynamoDB with SES alerts and scales to zero compute cost when idle.",
+      "url": "https://github.com/MRathi2303",
+      "sortOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "p2",
+      "name": "AI-Assisted DevOps Utility",
+      "description": "Automated repository analysis and Dockerfile generation pipeline using AWS Bedrock and ECR. Features context collection that auto-detects dependencies and runs GitHub Actions CI/CD with OIDC auth and Trivy vulnerability scans.",
+      "url": "https://github.com/MRathi2303",
+      "sortOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "p3",
+      "name": "3-Tier AWS Architecture with Terraform",
+      "description": "Production-style multi-AZ architecture on AWS deployed with modular Terraform. Security-first routing through an ALB into private EC2 compute and private RDS subnets, with remote S3 state management and zero direct public database access.",
+      "url": "https://github.com/MRathi2303",
+      "sortOrder": 3,
+      "isActive": true
+    }
+  ],
+  "certificates": [
+    {
+      "id": "ANTH-CCA-FOUND-2026",
+      "name": "Claude Certified Architect - Foundations",
+      "issuer": "Anthropic",
+      "date": "2026",
+      "credentialId": "ANTH-CCA-FOUND-2026",
+      "credentialUrl": "https://www.anthropic.com",
+      "icon": "🧠",
+      "fileUrl": "/certs/ANTH-CCA-FOUND-2026.pdf",
+      "sortOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": "KK-100CLOUD-4921",
+      "name": "100 Days of Cloud - AWS Certification",
+      "issuer": "KodeKloud",
+      "date": "2026",
+      "credentialId": "KK-100CLOUD-4921",
+      "credentialUrl": "https://kodekloud.com",
+      "icon": "🏅",
+      "sortOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": "AWS-ACAD-884920",
+      "name": "Cloud Foundations",
+      "issuer": "AWS Academy",
+      "date": "2026",
+      "credentialId": "AWS-ACAD-884920",
+      "credentialUrl": "https://aws.amazon.com/training/awsacademy/",
+      "icon": "☁️",
+      "sortOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": "KK-DOC-BEGIN-7712",
+      "name": "Docker for Absolute Beginners",
+      "issuer": "KodeKloud",
+      "date": "2026",
+      "credentialId": "KK-DOC-BEGIN-7712",
+      "credentialUrl": "https://kodekloud.com",
+      "icon": "🐳",
+      "sortOrder": 4,
+      "isActive": true
+    },
+    {
+      "id": "INF-CLOUD-INTRO-5521",
+      "name": "Introduction to Cloud Computing",
+      "issuer": "Infosys Springboard",
+      "date": "2026",
+      "credentialId": "INF-CLOUD-INTRO-5521",
+      "credentialUrl": "https://infyspringboard.onwingspan.com",
+      "icon": "📜",
+      "sortOrder": 5,
+      "isActive": true
+    }
+  ]
+}

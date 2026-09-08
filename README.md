@@ -23,10 +23,8 @@ Inspired by Linux terminal environments, window managers, and my daily work with
   - `./hire.sh` — Run an interactive availability check script.
   - `sudo` — Authenticate and enter Admin Edit mode.
   - `help` & `clear` — Standard terminal utilities.
-- **Sudo Admin Mode (Live In-Browser Editing)**: Press `Ctrl + Alt + S` (or `Cmd + Alt + S`) to unlock inline content editing directly in the browser, with changes persisted to `localStorage`.
-- **Interactive Resume & Certificate Uploader (Zero Git Headache)**: Upload new resume PDFs or add certificates directly through the web UI using drag & drop:
-  - Saved immediately to browser storage (`IndexedDB`) with instant link updates.
-  - Optional **GitHub 1-Click Sync**: Direct browser-to-GitHub API integration that commits the new files to `main`, automatically triggering Vercel to redeploy live in ~20 seconds.
+- **Sudo Admin Mode**: Press `Ctrl + Alt + S` (or `Cmd + Alt + S`) to authenticate with the private deployment password and edit content stored in GitHub.
+- **Interactive Resume & Certificate Uploader**: Upload resume PDFs and certificate PDFs/images through the authenticated editor. Files are committed by the server to GitHub; the GitHub token is never sent to the browser.
 - **Certificate Viewer Modal**: Clicking any certificate in the certifications list pops up an official terminal credential card showing issuer details, verification status, and credential IDs with direct download options.
 - **Simulated `wget` Resume Downloader**: Animates progress bar downloading my actual resume PDF (`Moon_Rathi_Resume.pdf`).
 - **No Heavy Frameworks**: Built with zero external UI libraries or heavy JS bundles — fast first paints, non-blocking fonts, and minimal memory footprint.
@@ -42,7 +40,10 @@ Inspired by Linux terminal environments, window managers, and my daily work with
 ├── script.js               # CLI parser, typewriter animations, and sudo mode logic
 ├── Moon_Rathi_Resume.pdf   # Bundled resume file
 ├── 404.html                # Terminal-styled 404 page
-├── vercel.json             # Vercel static routing and security headers
+├── api/                    # Vercel serverless auth, data, and admin APIs
+├── data/site.json          # Public editable portfolio data
+├── lib/github.js           # Server-only GitHub persistence and sessions
+├── vercel.json             # Vercel routing and security headers
 ├── package.json            # Project manifest
 ├── robots.txt              # Search engine crawler directives
 └── .gitignore              # Clean repository ignore list
@@ -52,7 +53,7 @@ Inspired by Linux terminal environments, window managers, and my daily work with
 
 ## 🚀 Running Locally
 
-No build tools, bundlers, or `npm install` steps required:
+No build tools or bundlers are required:
 
 1. Clone the repository:
    ```bash
@@ -61,14 +62,9 @@ No build tools, bundlers, or `npm install` steps required:
    ```
 
 2. Open in your browser:
-   - Double-click `index.html`, or
-   - Start a simple local server:
+   - Start the local editor server:
      ```bash
-     # Using Python
-     python3 -m http.server 8000
-
-     # Or using Node / npx
-     npx serve .
+     npm start
      ```
 
 3. Visit `http://localhost:8000` in your browser.
@@ -109,12 +105,23 @@ The project includes a ready-to-go `vercel.json`:
 2. Go to [vercel.com/new](https://vercel.com/new) and import `Portfolio-website`.
 3. Leave all build settings at default (Static Site) and click **Deploy**.
 
+### Private editor configuration
+
+Add these environment variables in Vercel Project Settings:
+
+- `ADMIN_PASSWORD`: private sudo password.
+- `SESSION_SECRET`: long random value for signing expiring admin cookies.
+- `GITHUB_TOKEN`: fine-grained token with Contents read/write access.
+- `GITHUB_REPO`: repository in `owner/name` form.
+- `GITHUB_BRANCH`: branch receiving editor changes, normally `main`.
+
+Never put these values in source files or browser storage. Rotate them from Vercel when needed.
+
 ---
 
 ## 📜 Resume & Certification Storage
 
-- **Resume**: Stored directly in the root directory as `Moon_Rathi_Resume.pdf`. Click `resume.pdf ↓` in the top bar or use the simulated `wget` section to download it.
-- **Certificates**: Store your official PDF or image credentials in the `certs/` folder. Add `data-cert-file="certs/your-cert.pdf"` to any certificate item in `index.html` to enable one-click document downloads from the Certificate Viewer modal.
+- **Local editor data**: Text and certificate metadata are stored in `data/site.json`; uploads are stored in local `assets/` and `certs/` folders. The local sudo password defaults to `admin`; set `ADMIN_PASSWORD` before `npm start` to use another password.
 
 ---
 

@@ -197,8 +197,6 @@ function revealDesktop () {
   initCertModalViewer();
   initHireSh();
   updateWgetTimestamp();
-  loadStoredResume();
-  loadStoredCerts();
   initAssetManager();
 
   if (recoveryBoot) {
@@ -225,7 +223,7 @@ if (grubRecovery) grubRecovery.addEventListener('click', (e) => {
 /* ════════════════════════════════════════════════════
    CERTIFICATE VIEWER MODAL
 ════════════════════════════════════════════════════ */
-function initCertModalViewer () {
+function initLegacyCertModalViewer () {
   const certItems = document.querySelectorAll('.js-cert-item');
 
   certItems.forEach(item => {
@@ -510,17 +508,6 @@ function closeSudoModal () {
   if (sudoModal) sudoModal.hidden = true;
 }
 
-function authenticateSudo () {
-  const pass = sudoPassInput ? sudoPassInput.value.trim().toLowerCase() : '';
-  if (pass === 'admin' || pass === 'moon' || pass === 'sudo' || pass === 'root' || pass === '') {
-    closeSudoModal();
-    enableSudoAdminMode();
-    showToast("⚡ Authenticated! Sudo Admin Mode active. Click text to edit.");
-  } else {
-    if (sudoError) sudoError.hidden = false;
-  }
-}
-
 function enableSudoAdminMode () {
   isSudoMode = true;
   document.body.classList.add('sudo-active');
@@ -546,47 +533,6 @@ function disableSudoAdminMode () {
     }
   });
   showToast("Exit Sudo Admin Mode.");
-}
-
-function saveSudoContent () {
-  const data = {};
-  EDITABLE_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      data[id] = el.innerHTML;
-    }
-  });
-
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-    showToast("💾 Saved! Webpage changes persisted to LocalStorage.");
-  } catch (err) {
-    showToast("⚠️ Could not save to localStorage: " + err.message);
-  }
-}
-
-function loadSavedSudoContent () {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      Object.keys(data).forEach(id => {
-        const el = document.getElementById(id);
-        if (el && data[id]) {
-          el.innerHTML = data[id];
-        }
-      });
-    }
-  } catch (err) {
-    console.error("Error loading saved sudo data", err);
-  }
-}
-
-function resetSudoContent () {
-  if (confirm("Reset all website content back to default code values?")) {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    location.reload();
-  }
 }
 
 if (sudoForm) {
@@ -789,12 +735,10 @@ function runResumeWget () {
    - IndexedDB for instant client storage
    - GitHub API sync for automatic live Vercel deployments
 ════════════════════════════════════════════════════ */
-const GITHUB_REPO = 'MRathi2303/Portfolio-website';
-const GITHUB_TOKEN_KEY = 'moon_github_pat';
 
 function openAssetDB () {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('MoonPortfolioAssets', 1);
+    const req = globalThis.__legacyStorageDisabled.open('MoonPortfolioAssets', 1);
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('assets')) {
@@ -867,11 +811,11 @@ async function idbGetAllCerts () {
 }
 
 function getGitHubToken () {
-  return localStorage.getItem(GITHUB_TOKEN_KEY) || '';
+  return '';
 }
 
 function setGitHubToken (token) {
-  localStorage.setItem(GITHUB_TOKEN_KEY, token.trim());
+  void token;
 }
 
 async function commitFileToGitHub (path, fileBlob, commitMsg) {
@@ -987,7 +931,7 @@ async function loadStoredCerts () {
   initCertModalViewer();
 }
 
-function initAssetManager () {
+function initLegacyAssetManager () {
   const uploadResumeBtn   = document.getElementById('sudo-upload-resume-btn');
   const addCertBtn         = document.getElementById('sudo-add-cert-btn');
   const githubSyncBtn      = document.getElementById('sudo-github-sync-btn');
@@ -1207,4 +1151,328 @@ function initAssetManager () {
       }
     });
   }
+}
+
+/* ════════════════════════════════════════════════════
+   SERVER-BACKED SUDO EDITOR
+════════════════════════════════════════════════════ */
+let remoteSite = null;
+let editingCertificateId = '';
+
+async function portfolioApi(path, options = {}) {
+  const response = await fetch(path, {
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json', ...(options.headers || {}) },
+    ...options
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function normalizeLink(value, fallback = '#') {
+  const text = String(value || '').trim();
+  return text || fallback;
+}
+
+function renderRemoteProjects(projects = []) {
+  const items = document.querySelectorAll('.proj');
+  items.forEach(item => { item.hidden = true; });
+  projects.filter(project => project.isActive !== false).forEach((project, index) => {
+    const item = items[index];
+    if (!item) return;
+    item.hidden = false;
+    item.href = normalizeLink(project.url);
+    const name = item.querySelector('.proj__name');
+    const description = item.querySelector('.proj__desc');
+    if (name) name.textContent = project.name;
+    if (description) description.textContent = project.description;
+    item.dataset.projectId = project.id;
+    let actions = item.querySelector('.proj__sudo-actions');
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.className = 'proj__sudo-actions sudo-only';
+      actions.innerHTML = '<button type="button" class="sudo-item-btn" data-project-edit>Edit</button><button type="button" class="sudo-item-btn sudo-item-btn--delete" data-project-delete>Delete</button>';
+      item.querySelector('.proj__head')?.appendChild(actions);
+    }
+  });
+  document.querySelectorAll('[data-project-edit]').forEach(button => {
+    button.onclick = event => { event.preventDefault(); event.stopPropagation(); openProjectEdit(button.closest('.proj')); };
+  });
+  document.querySelectorAll('[data-project-delete]').forEach(button => {
+    button.onclick = event => { event.preventDefault(); event.stopPropagation(); deleteProject(button.closest('.proj')); };
+  });
+}
+
+function renderRemoteCertificates(certificates = []) {
+  const list = document.getElementById('certs-list') || document.querySelector('.certs--list');
+  if (!list) return;
+  list.innerHTML = '';
+  certificates.filter(cert => cert.isActive !== false).forEach(cert => {
+    const item = document.createElement('div');
+    item.className = 'cert js-cert-item';
+    item.dataset.certName = cert.name;
+    item.dataset.certIssuer = cert.issuer;
+    item.dataset.certDate = cert.date || '';
+    item.dataset.certId = cert.credentialId || cert.id;
+    item.dataset.certIcon = cert.icon || '📜';
+    item.dataset.certLink = cert.credentialUrl || '#';
+    item.dataset.certFile = cert.fileUrl || '';
+    item.dataset.certDbId = cert.id;
+    item.innerHTML = `<div class="cert__icon">${escapeHtml(cert.icon || '📜')}</div>
+      <div class="cert__info"><span class="cert__name">${escapeHtml(cert.name)}</span>
+      <span class="cert__issuer">${escapeHtml(cert.issuer)} · ${escapeHtml(cert.date || '')}</span></div>
+      <span class="cert__view-hint">view certificate ↗</span>
+      <span class="cert__badge cert__badge--ok">verified ✓</span>
+      <div class="cert__sudo-actions sudo-only">
+        <button type="button" class="cert__action-btn cert__action-btn--edit" data-cert-edit="${escapeHtml(cert.id)}">Edit</button>
+        <button type="button" class="cert__action-btn cert__action-btn--del" data-cert-delete="${escapeHtml(cert.id)}">Delete</button>
+      </div>`;
+    list.appendChild(item);
+  });
+  initCertModalViewer();
+  if (isSudoMode) document.body.classList.add('sudo-active');
+}
+
+function syncRemoteLinks(site) {
+  const links = site.links || {};
+  const email = document.getElementById('edit-email-link');
+  const linkedin = document.getElementById('edit-linkedin-link');
+  const github = document.getElementById('edit-github-link');
+  if (email && links.email) { email.textContent = links.email; email.href = `mailto:${links.email}`; }
+  if (linkedin && links.linkedin) { linkedin.textContent = links.linkedin.replace(/^https?:\/\//, ''); linkedin.href = links.linkedin; }
+  if (github && links.github) { github.textContent = links.github.replace(/^https?:\/\//, ''); github.href = links.github; }
+}
+
+async function loadSavedSudoContent () {
+  try {
+    const data = await portfolioApi('/api/site');
+    remoteSite = data;
+    Object.entries(data.content || {}).forEach(([id, html]) => {
+      const element = document.getElementById(id);
+      if (element && html) element.innerHTML = html;
+    });
+    renderRemoteProjects(data.projects);
+    renderRemoteCertificates(data.certificates);
+    syncRemoteLinks(data);
+    loadRemoteResume(data.profile);
+  } catch (error) {
+    console.error('Unable to load remote portfolio data', error);
+  }
+}
+
+function loadRemoteResume(profile = {}) {
+  const url = profile.resumeUrl || './Moon_Rathi_Resume.pdf';
+  const filename = profile.resumeFilename || 'Moon_Rathi_Resume.pdf';
+  document.querySelectorAll('.term__tabs-cv, #resume-dl-btn').forEach(link => {
+    link.href = url;
+    link.download = filename;
+  });
+  const filenameDisplay = document.getElementById('edit-resume-filename');
+  if (filenameDisplay) filenameDisplay.textContent = filename;
+}
+
+async function authenticateSudo () {
+  try {
+    await portfolioApi('/api/auth', { method: 'POST', body: JSON.stringify({ password: sudoPassInput?.value || '' }) });
+    closeSudoModal();
+    enableSudoAdminMode();
+    showToast('Authenticated. Sudo Admin Mode active.');
+  } catch (error) {
+    if (sudoError) { sudoError.hidden = false; sudoError.textContent = error.message; }
+  }
+}
+
+async function saveSudoContent () {
+  const content = {};
+  EDITABLE_IDS.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) content[id] = element.innerHTML;
+  });
+  try {
+    const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'save-content', content }) });
+    remoteSite = result.site;
+    syncRemoteLinks(remoteSite);
+    showToast('Saved locally to data/site.json.');
+  } catch (error) { showToast(`Could not save: ${error.message}`); }
+}
+
+async function resetSudoContent () {
+  showToast('Reset is disabled in the web editor. Edit and save the fields you need.');
+}
+
+function fileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadPortfolioFile(file, folder, id) {
+  const extension = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const path = `${folder}/${id}.${extension}`;
+  const result = await portfolioApi('/api/admin', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'upload', path, contentType: file.type, base64: await fileAsBase64(file) })
+  });
+  return result.url;
+}
+
+function openCertEdit(item) {
+  const cert = remoteSite?.certificates?.find(entry => entry.id === item.dataset.certDbId);
+  if (!cert) return;
+  editingCertificateId = cert.id;
+  document.getElementById('cert-input-title').value = cert.name;
+  document.getElementById('cert-input-issuer').value = cert.issuer;
+  document.getElementById('cert-input-date').value = cert.date || '';
+  document.getElementById('cert-input-id').value = cert.credentialId || '';
+  document.getElementById('cert-input-icon').value = cert.icon || '📜';
+  document.getElementById('cert-input-url').value = cert.credentialUrl === '#' ? '' : cert.credentialUrl || '';
+  document.getElementById('cert-edit-modal').hidden = false;
+}
+
+async function deleteCert(item) {
+  if (!confirm(`Delete ${item.dataset.certName}?`)) return;
+  try {
+    const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'delete-certificate', id: item.dataset.certDbId }) });
+    remoteSite = result.site;
+    renderRemoteCertificates(remoteSite.certificates);
+    showToast('Certificate deleted.');
+  } catch (error) { showToast(`Could not delete: ${error.message}`); }
+}
+
+function openProjectEdit(item) {
+  const project = remoteSite?.projects?.find(entry => entry.id === item.dataset.projectId);
+  if (!project) return;
+  document.getElementById('project-input-id').value = project.id;
+  document.getElementById('project-input-name').value = project.name;
+  document.getElementById('project-input-description').value = project.description;
+  document.getElementById('project-input-url').value = project.url;
+  document.getElementById('project-edit-modal').hidden = false;
+}
+
+async function deleteProject(item) {
+  if (!confirm(`Delete ${item.querySelector('.proj__name')?.textContent || 'this project'}?`)) return;
+  try {
+    const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'delete-project', id: item.dataset.projectId }) });
+    remoteSite = result.site;
+    renderRemoteProjects(remoteSite.projects);
+    showToast('Project deleted.');
+  } catch (error) { showToast(`Could not delete: ${error.message}`); }
+}
+
+function initCertModalViewer () {
+  document.querySelectorAll('.js-cert-item').forEach(item => {
+    item.onclick = event => {
+      if (event.target.closest('.cert__sudo-actions')) return;
+      const name = item.dataset.certName || 'Certificate';
+      if (certIconDisplay) certIconDisplay.textContent = item.dataset.certIcon || '📜';
+      if (certNameDisplay) certNameDisplay.textContent = name;
+      if (certIssuerDisplay) certIssuerDisplay.textContent = `${item.dataset.certIssuer || 'Issuer'} · Issued ${item.dataset.certDate || ''}`;
+      if (certCardTitle) certCardTitle.textContent = name;
+      if (certIdDisplay) certIdDisplay.textContent = item.dataset.certId || 'VERIFIED-CREDENTIAL';
+      if (certOrgDisplay) certOrgDisplay.textContent = item.dataset.certIssuer || 'Issuer';
+      if (certVerifyLink) { certVerifyLink.href = item.dataset.certLink || '#'; certVerifyLink.hidden = !item.dataset.certLink || item.dataset.certLink === '#'; }
+      if (certDownloadBtn) {
+        certDownloadBtn.href = item.dataset.certFile || '#';
+        certDownloadBtn.download = `${name.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+        certDownloadBtn.hidden = !item.dataset.certFile;
+      }
+      const preview = document.querySelector('.cert-preview-card');
+      if (preview) {
+        const existing = preview.querySelector('.cert-live-file');
+        if (existing) existing.remove();
+        const file = item.dataset.certFile;
+        if (file) {
+          const element = file.toLowerCase().endsWith('.pdf') ? document.createElement('iframe') : document.createElement('img');
+          element.className = 'cert-live-file';
+          element.src = file;
+          element.alt = name;
+          preview.appendChild(element);
+        }
+      }
+      if (certModal) certModal.hidden = false;
+    };
+  });
+  document.querySelectorAll('[data-cert-edit]').forEach(button => {
+    button.onclick = event => { event.stopPropagation(); openCertEdit(button.closest('.js-cert-item')); };
+  });
+  document.querySelectorAll('[data-cert-delete]').forEach(button => {
+    button.onclick = event => { event.stopPropagation(); deleteCert(button.closest('.js-cert-item')); };
+  });
+}
+
+function initAssetManager () {
+  const resumeModal = document.getElementById('resume-upload-modal');
+  const certModalEl = document.getElementById('cert-edit-modal');
+  let selectedResumeFile = null;
+  document.getElementById('sudo-upload-resume-btn')?.addEventListener('click', () => { resumeModal.hidden = false; });
+  document.getElementById('resume-modal-close')?.addEventListener('click', () => { resumeModal.hidden = true; });
+  document.getElementById('resume-modal-cancel')?.addEventListener('click', () => { resumeModal.hidden = true; });
+  document.getElementById('resume-file-input')?.addEventListener('change', event => {
+    selectedResumeFile = event.target.files[0] || null;
+    const info = document.getElementById('resume-file-info');
+    if (info && selectedResumeFile) { info.hidden = false; info.textContent = `Selected: ${selectedResumeFile.name}`; }
+    const save = document.getElementById('save-resume-btn');
+    if (save) save.disabled = !selectedResumeFile;
+  });
+  document.getElementById('save-resume-btn')?.addEventListener('click', async () => {
+    if (!selectedResumeFile) return;
+    try {
+      const url = await uploadPortfolioFile(selectedResumeFile, 'assets', 'resume');
+      const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'save-profile', profile: { resumeUrl: url, resumeFilename: selectedResumeFile.name } }) });
+      remoteSite = result.site;
+      loadRemoteResume(remoteSite.profile);
+      resumeModal.hidden = true;
+      showToast('Resume uploaded and saved.');
+    } catch (error) { showToast(`Resume upload failed: ${error.message}`); }
+  });
+  document.getElementById('sudo-add-cert-btn')?.addEventListener('click', () => {
+    editingCertificateId = '';
+    document.getElementById('cert-edit-form')?.reset();
+    certModalEl.hidden = false;
+  });
+  const projectModal = document.getElementById('project-edit-modal');
+  document.getElementById('project-edit-modal-close')?.addEventListener('click', () => { projectModal.hidden = true; });
+  document.getElementById('project-edit-cancel')?.addEventListener('click', () => { projectModal.hidden = true; });
+  document.getElementById('project-edit-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    try {
+      const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'save-project', project: {
+        id: document.getElementById('project-input-id').value,
+        name: document.getElementById('project-input-name').value,
+        description: document.getElementById('project-input-description').value,
+        url: document.getElementById('project-input-url').value,
+        sortOrder: remoteSite?.projects?.find(project => project.id === document.getElementById('project-input-id').value)?.sortOrder || 0
+      } }) });
+      remoteSite = result.site;
+      renderRemoteProjects(remoteSite.projects);
+      projectModal.hidden = true;
+      showToast('Project saved locally.');
+    } catch (error) { showToast(`Project save failed: ${error.message}`); }
+  });
+  document.getElementById('cert-edit-modal-close')?.addEventListener('click', () => { certModalEl.hidden = true; });
+  document.getElementById('cert-edit-cancel')?.addEventListener('click', () => { certModalEl.hidden = true; });
+  document.getElementById('cert-edit-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const file = document.getElementById('cert-file-input')?.files[0];
+    const id = editingCertificateId || document.getElementById('cert-input-id').value.trim() || `cert-${Date.now()}`;
+    const current = remoteSite?.certificates?.find(cert => cert.id === id);
+    try {
+      const fileUrl = file ? await uploadPortfolioFile(file, 'certs', id) : current?.fileUrl || '';
+      const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'save-certificate', certificate: {
+        id, name: document.getElementById('cert-input-title').value, issuer: document.getElementById('cert-input-issuer').value,
+        date: document.getElementById('cert-input-date').value, credentialId: document.getElementById('cert-input-id').value || id,
+        credentialUrl: document.getElementById('cert-input-url').value || '#', icon: document.getElementById('cert-input-icon').value || '📜', fileUrl,
+        sortOrder: current?.sortOrder || (remoteSite?.certificates?.length || 0) + 1
+      } }) });
+      remoteSite = result.site;
+      renderRemoteCertificates(remoteSite.certificates);
+      certModalEl.hidden = true;
+      showToast('Certificate saved.');
+    } catch (error) { showToast(`Certificate save failed: ${error.message}`); }
+  });
+  document.getElementById('sudo-github-sync-btn')?.remove();
 }

@@ -23,12 +23,17 @@ jobs:
       - name: Validate JavaScript Syntax
         run: |
           node -c script.js
+          node -c lib/github.js
+          node -c api/site.js
+          node -c api/auth.js
+          node -c api/admin.js
           echo "JavaScript syntax validation: PASSED"
 
       - name: Validate JSON configurations
         run: |
           node -e "JSON.parse(require('fs').readFileSync('vercel.json', 'utf8'))"
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('data/site.json', 'utf8'))"
           echo "JSON configs validation: PASSED"
 
       - name: Verify Static Assets & PDF
