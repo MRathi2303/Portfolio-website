@@ -15,17 +15,18 @@ const BOOT_LINES = [
 
 const HIRE_LINES = [
   { t: 'dim', s: '#!/usr/bin/env bash' },
-  { t: 'dim', s: '# hire.sh — contact script' },
-  { t: '', s: '' },
-  { t: 'g',   s: '$ ./hire.sh' },
-  { t: '',    s: 'Checking availability.......... [OK]' },
-  { t: '',    s: 'Loading resume................. [DONE]' },
-  { t: '',    s: 'Verifying skills match......... [OK]' },
+  { t: 'dim', s: '# hire.sh — candidate availability probe' },
   { t: '',    s: '' },
-  { t: 'g',   s: 'Status   : ✅ Open to opportunities' },
-  { t: 'g',   s: 'Response : typically within 24 hours' },
+  { t: 'g',   s: '$ ./hire.sh --check-status' },
+  { t: '',    s: 'Probing current status......... [DEVOPS INTERN @ MACTORES]' },
+  { t: '',    s: 'Checking core competencies..... [AWS · TERRAFORM · DOCKER · CI/CD]' },
+  { t: '',    s: 'Verifying AI credentials....... [CLAUDE CERTIFIED ARCHITECT]' },
+  { t: '',    s: 'Loading resume payload......... [OK — Moon_Rathi_Resume.pdf]' },
   { t: '',    s: '' },
-  { t: '',    s: 'Ready to connect? Hit the button below ↓' },
+  { t: 'g',   s: 'Status   : 🟢 Active — Open to DevOps & Cloud opportunities' },
+  { t: 'g',   s: 'Response : Typically within 24 hours' },
+  { t: '',    s: '' },
+  { t: '',    s: 'Ready to connect? Click below to send an email ↓' },
 ];
 
 /* DOM refs */
@@ -48,6 +49,7 @@ const minitermOut     = document.getElementById('miniterm-out');
 const minitermActions = document.getElementById('miniterm-actions');
 const minitermClose   = document.getElementById('miniterm-close');
 const minitermDone    = document.getElementById('miniterm-done');
+const runHireBtn      = document.getElementById('run-hire-btn');
 
 const certModal       = document.getElementById('cert-modal');
 const certModalClose  = document.getElementById('cert-modal-close');
@@ -159,7 +161,7 @@ function runSplash () {
   const logInterval = setInterval(() => {
     if (i >= BOOT_LINES.length) {
       clearInterval(logInterval);
-      setTimeout(revealDesktop, 480);
+      setTimeout(revealDesktop, 420);
       return;
     }
     const line = document.createElement('div');
@@ -171,13 +173,13 @@ function runSplash () {
       bootLog.scrollTop = bootLog.scrollHeight;
     }
     i++;
-  }, 96);
+  }, 90);
 }
 
 function revealDesktop () {
   if (boot) {
     boot.classList.add('fade-out');
-    setTimeout(() => { boot.hidden = true; }, 600);
+    setTimeout(() => { boot.hidden = true; }, 550);
   }
 
   if (panel) panel.classList.add('visible');
@@ -192,6 +194,8 @@ function revealDesktop () {
   loadSavedSudoContent();
   initInteractiveTerminal();
   initCertModalViewer();
+  initHireSh();
+  updateWgetTimestamp();
 
   if (recoveryBoot) {
     enableSudoAdminMode();
@@ -255,6 +259,68 @@ function initCertModalViewer () {
 
 function closeCertModal () {
   if (certModal) certModal.hidden = true;
+}
+
+/* ════════════════════════════════════════════════════
+   HIRE.SH INTERACTIVE MODAL
+════════════════════════════════════════════════════ */
+function initHireSh () {
+  if (runHireBtn) runHireBtn.addEventListener('click', openHireSh);
+  if (minitermClose) minitermClose.addEventListener('click', closeHireSh);
+  if (minitermDone) minitermDone.addEventListener('click', closeHireSh);
+  if (miniterm) {
+    miniterm.addEventListener('click', e => {
+      if (e.target === miniterm) closeHireSh();
+    });
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && miniterm && !miniterm.hidden) closeHireSh();
+  });
+}
+
+function openHireSh () {
+  if (hireRunning) return;
+  hireRunning = true;
+  if (miniterm) miniterm.hidden = false;
+  if (minitermOut) minitermOut.innerHTML = '';
+  if (minitermActions) minitermActions.hidden = true;
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= HIRE_LINES.length) {
+      clearInterval(interval);
+      hireRunning = false;
+      if (minitermActions) minitermActions.hidden = false;
+      return;
+    }
+    const item = HIRE_LINES[i];
+    const span = document.createElement('span');
+    if (item.t) span.className = item.t;
+    span.textContent = item.s + '\n';
+    if (minitermOut) {
+      minitermOut.appendChild(span);
+      minitermOut.scrollTop = minitermOut.scrollHeight;
+    }
+    i++;
+  }, 75);
+}
+
+function closeHireSh () {
+  if (miniterm) miniterm.hidden = true;
+  hireRunning = false;
+}
+
+/* ════════════════════════════════════════════════════
+   DYNAMIC WGET TIMESTAMP
+════════════════════════════════════════════════════ */
+function updateWgetTimestamp () {
+  const ts = document.getElementById('wget-timestamp');
+  const dt = document.getElementById('wget-done-time');
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = now.toTimeString().slice(0, 8);
+  if (ts) ts.textContent = `--${dateStr} ${timeStr}--  https://moon.rathi/Moon_Rathi_Resume.pdf`;
+  if (dt) dt.textContent = timeStr;
 }
 
 /* ════════════════════════════════════════════════════
@@ -322,40 +388,48 @@ function executeCLICommand (cmdRaw) {
   const outLine = document.createElement('div');
   outLine.className = 'interterm-out-line';
 
+  const validSections = ['about','experience','education','projects','skills','certs','contact','resume','top'];
+
   if (lower === 'help') {
     outLine.innerHTML = `Available CLI Commands:
-  <span class="ok">cd &lt;section&gt;</span>  : Navigate to page section (e.g. cd projects, cd skills, cd top)
-  <span class="ok">cat &lt;file&gt;</span>     : Scroll to section (e.g. cat about, cat education)
-  <span class="ok">sudo / su</span>       : Open Sudo Admin password prompt / enable admin mode
+  <span class="ok">cd &lt;section&gt;</span>  : Navigate to section (e.g. cd experience, cd projects, cd skills)
+  <span class="ok">cat &lt;file&gt;</span>     : Scroll to section (e.g. cat experience, cat about)
+  <span class="ok">./hire.sh</span>       : Run interactive candidate availability script
+  <span class="ok">sudo / su</span>       : Open Sudo Admin password prompt
   <span class="ok">ls</span>              : List all page directories/sections
-  <span class="ok">whoami</span>          : Display user identity
-  <span class="ok">neofetch</span>        : Display tech stack info
-  <span class="ok">clear</span>           : Clear terminal screen output
+  <span class="ok">whoami</span>          : Display candidate summary
+  <span class="ok">neofetch</span>        : Display environment and tech stack info
+  <span class="ok">clear</span>           : Clear terminal output
   <span class="ok">exit</span>            : Close interactive terminal console`;
   }
   else if (lower === 'ls') {
-    outLine.innerHTML = `<span class="ok">about/</span>  <span class="ok">education/</span>  <span class="ok">projects/</span>  <span class="ok">skills/</span>  <span class="ok">certs/</span>  <span class="ok">contact/</span>  <span class="ok">resume.pdf</span>`;
+    outLine.innerHTML = `<span class="ok">about/</span>  <span class="ok">experience/</span>  <span class="ok">education/</span>  <span class="ok">projects/</span>  <span class="ok">skills/</span>  <span class="ok">certs/</span>  <span class="ok">contact/</span>  <span class="ok">Moon_Rathi_Resume.pdf</span>`;
   }
   else if (lower.startsWith('cd ') || lower.startsWith('goto ')) {
     const target = lower.split(' ')[1] || '';
-    if (['about','education','projects','skills','certs','contact','resume','top'].includes(target)) {
+    if (validSections.includes(target)) {
       outLine.innerHTML = `Navigating to section <span class="ok">#${target}</span>...`;
       scrollToSection(target);
-      setTimeout(closeInteractiveTerminal, 600);
+      setTimeout(closeInteractiveTerminal, 500);
     } else {
-      outLine.innerHTML = `<span style="color:#ef4444">cd: no such file or directory: ${escapeHtml(target)}</span>. Type 'ls' to see sections.`;
+      outLine.innerHTML = `<span style="color:#ef4444">cd: no such file or directory: ${escapeHtml(target)}</span>. Type 'ls' to list sections.`;
     }
   }
   else if (lower.startsWith('cat ')) {
     const target = lower.split(' ')[1] || '';
     const clean = target.replace('.md','').replace('.txt','');
-    if (['about','education','projects','skills','certs','contact','resume'].includes(clean)) {
+    if (validSections.includes(clean)) {
       outLine.innerHTML = `Displaying <span class="ok">#${clean}</span>...`;
       scrollToSection(clean);
-      setTimeout(closeInteractiveTerminal, 600);
+      setTimeout(closeInteractiveTerminal, 500);
     } else {
       outLine.innerHTML = `<span style="color:#ef4444">cat: ${escapeHtml(target)}: No such file or directory</span>`;
     }
+  }
+  else if (lower === './hire.sh' || lower === 'hire.sh' || lower === 'hire') {
+    outLine.innerHTML = `Executing <span class="ok">./hire.sh</span>...`;
+    closeInteractiveTerminal();
+    setTimeout(openHireSh, 200);
   }
   else if (lower === 'sudo' || lower === 'sudo su' || lower === 'sudo edit' || lower === 'su') {
     outLine.innerHTML = `Launching <span class="ok">Sudo Admin Authentication</span>...`;
@@ -363,13 +437,15 @@ function executeCLICommand (cmdRaw) {
     openSudoModal();
   }
   else if (lower === 'whoami') {
-    outLine.innerHTML = `Moon Rathi — Cloud Computing Student & DevOps Enthusiast @ IILM University`;
+    outLine.innerHTML = `Moon Rathi — DevOps Engineering Intern @ Mactores &amp; B.Tech CS (Claude Certified Architect · AWS · Terraform)`;
   }
   else if (lower === 'neofetch') {
     outLine.innerHTML = `OS      : blaze.portfolio os (Linux 6.8.0-blaze)
-Host    : Moon Rathi Cloud Workstation
+Host    : Moon Rathi DevOps Workstation
+Current : DevOps Engineering Intern @ Mactores
 Stack   : AWS, Terraform, Docker, Python, GitHub Actions, Linux
-Status  : 🟢 Active — Open to DevOps & Cloud Opportunities`;
+Cert    : Claude Certified Architect – Foundations (Anthropic)
+Status  : 🟢 Active — Open to DevOps &amp; Cloud Opportunities`;
   }
   else if (lower === 'clear') {
     if (intertermHistory) intertermHistory.innerHTML = '';
@@ -380,7 +456,7 @@ Status  : 🟢 Active — Open to DevOps & Cloud Opportunities`;
     return;
   }
   else {
-    outLine.innerHTML = `<span style="color:#ef4444">bash: command not found: ${escapeHtml(cmd)}</span>. Type '<span class="ok">help</span>' for commands or '<span class="ok">cd projects</span>' to navigate.`;
+    outLine.innerHTML = `<span style="color:#ef4444">bash: command not found: ${escapeHtml(cmd)}</span>. Type '<span class="ok">help</span>' or '<span class="ok">cd projects</span>'.`;
   }
 
   entry.appendChild(outLine);
@@ -568,7 +644,7 @@ function showToast (msg) {
   toastTimer = setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => { toast.hidden = true; }, 300);
-  }, 3200);
+  }, 3000);
 }
 
 /* ════════════════════════════════════════════════════
@@ -576,7 +652,7 @@ function showToast (msg) {
 ════════════════════════════════════════════════════ */
 function initScrollSpy () {
   const tabLinks = document.querySelectorAll('.tab-link');
-  const sections = ['about','education','projects','skills','certs','contact','resume'];
+  const sections = ['about','experience','education','projects','skills','certs','contact','resume'];
   const anchors = sections.map(id => document.getElementById(id)).filter(Boolean);
 
   const obs = new IntersectionObserver(entries => {
@@ -611,7 +687,7 @@ function initReveal () {
   }, { threshold: 0.08 });
 
   blocks.forEach((el, i) => {
-    el.style.transitionDelay = i < 4 ? `${i * 84}ms` : '0ms';
+    el.style.transitionDelay = i < 4 ? `${i * 70}ms` : '0ms';
     obs.observe(el);
   });
 }
@@ -636,7 +712,7 @@ function initSectionCardTypewriters () {
         const caret      = card.querySelector('.js-caret');
 
         let charIdx = 0;
-        const typeSpeed = Math.max(36, Math.floor(720 / (cmdText.length || 1)));
+        const typeSpeed = Math.max(30, Math.floor(640 / (cmdText.length || 1)));
 
         function typeChar () {
           if (charIdx < cmdText.length) {
@@ -651,15 +727,15 @@ function initSectionCardTypewriters () {
               if (card.querySelector('#resume-progress')) {
                 runResumeWget();
               }
-            }, 220);
+            }, 180);
           }
         }
 
-        setTimeout(typeChar, 300);
+        setTimeout(typeChar, 250);
       }
     });
   }, {
-    threshold: 0.15
+    threshold: 0.12
   });
 
   cards.forEach(c => obs.observe(c));
@@ -675,7 +751,7 @@ function runResumeWget () {
 
   let pct = 0;
   const interval = setInterval(() => {
-    pct += Math.floor(Math.random() * 15) + 10;
+    pct += Math.floor(Math.random() * 18) + 12;
     if (pct >= 100) {
       pct = 100;
       clearInterval(interval);
@@ -685,10 +761,10 @@ function runResumeWget () {
       setTimeout(() => {
         if (wgetDone) wgetDone.hidden = false;
         if (dlBtn) dlBtn.style.display = 'inline-flex';
-      }, 360);
+      }, 300);
     } else {
       progressBar.style.width = pct + '%';
       progressText.textContent = pct + '%';
     }
-  }, 120);
+  }, 100);
 }

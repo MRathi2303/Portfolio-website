@@ -1,0 +1,19 @@
+{
+  "name": "moon-rathi-portfolio",
+  "version": "1.0.0",
+  "description": "Moon Rathi — DevOps & Cloud Engineering Portfolio (blaze.portfolio os)",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "portfolio",
+    "devops",
+    "cloud-computing",
+    "aws",
+    "terraform",
+    "docker"
+  ],
+  "author": "Moon Rathi <moonrathi111@gmail.com>",
+  "license": "MIT"
+}
