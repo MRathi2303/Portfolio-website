@@ -18,10 +18,5 @@
         { "key": "Content-Disposition", "value": "inline; filename=\"Moon_Rathi_Resume.pdf\"" }
       ]
     }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1.js" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "status": 404, "dest": "/404.html" }
   ]
 }
