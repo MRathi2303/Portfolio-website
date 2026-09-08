@@ -1368,6 +1368,20 @@ async function deleteProject(item) {
 }
 
 function initCertModalViewer () {
+  const closeViewer = () => {
+    if (certModal) certModal.hidden = true;
+    const liveFile = document.querySelector('.cert-preview-card .cert-live-file');
+    if (liveFile) liveFile.remove();
+  };
+
+  if (certModalClose) certModalClose.onclick = closeViewer;
+  if (certModalDone) certModalDone.onclick = closeViewer;
+  if (certModal) {
+    certModal.onclick = event => {
+      if (event.target === certModal) closeViewer();
+    };
+  }
+
   document.querySelectorAll('.js-cert-item').forEach(item => {
     item.onclick = event => {
       if (event.target.closest('.cert__sudo-actions')) return;
@@ -1406,6 +1420,10 @@ function initCertModalViewer () {
   document.querySelectorAll('[data-cert-delete]').forEach(button => {
     button.onclick = event => { event.stopPropagation(); deleteCert(button.closest('.js-cert-item')); };
   });
+
+  document.onkeydown = event => {
+    if (event.key === 'Escape' && certModal && !certModal.hidden) closeViewer();
+  };
 }
 
 function initAssetManager () {
