@@ -1297,7 +1297,7 @@ async function saveSudoContent () {
     const result = await portfolioApi('/api/admin', { method: 'POST', body: JSON.stringify({ action: 'save-content', content }) });
     remoteSite = result.site;
     syncRemoteLinks(remoteSite);
-    showToast('Saved locally to data/site.json.');
+    showToast('Changes saved successfully.');
   } catch (error) { showToast(`Could not save: ${error.message}`); }
 }
 
