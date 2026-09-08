@@ -72,6 +72,32 @@ No build tools, bundlers, or `npm install` steps required:
 
 ---
 
+## 🐳 Running with Docker
+
+Run the entire portfolio inside an optimized Alpine Linux + Nginx container:
+
+```bash
+# Build and run with Docker Compose
+docker compose up -d
+
+# Or build and run directly with Docker
+docker build -t moonrathi/portfolio-web .
+docker run -d -p 8080:80 moonrathi/portfolio-web
+```
+
+Access the site at `http://localhost:8080`.
+
+---
+
+## ⚙️ GitHub Actions CI/CD Pipeline
+
+The repository includes an automated workflow in `.github/workflows/ci-cd.yml` that runs on every push:
+1. **Quality & Syntax Check**: Validates JavaScript syntax, JSON configs (`vercel.json`, `package.json`), and static file integrity.
+2. **Container Build & Smoke Test**: Automatically builds the Alpine Nginx Docker container and verifies HTTP 200 responses.
+3. **Lighthouse Audit**: Evaluates performance, best practices, and SEO readiness.
+
+---
+
 ## ☁️ Deploying to Vercel
 
 The project includes a ready-to-go `vercel.json`:
@@ -79,6 +105,13 @@ The project includes a ready-to-go `vercel.json`:
 1. Fork or push this repository to your GitHub account.
 2. Go to [vercel.com/new](https://vercel.com/new) and import `Portfolio-website`.
 3. Leave all build settings at default (Static Site) and click **Deploy**.
+
+---
+
+## 📜 Resume & Certification Storage
+
+- **Resume**: Stored directly in the root directory as `Moon_Rathi_Resume.pdf`. Click `resume.pdf ↓` in the top bar or use the simulated `wget` section to download it.
+- **Certificates**: Store your official PDF or image credentials in the `certs/` folder. Add `data-cert-file="certs/your-cert.pdf"` to any certificate item in `index.html` to enable one-click document downloads from the Certificate Viewer modal.
 
 ---
 

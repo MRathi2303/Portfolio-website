@@ -373,6 +373,8 @@ body.sudo-active .desktop { padding-top: calc(var(--panel-h) + 42px); }
 .miniterm__btn { padding: 7px 18px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: .82rem; cursor: pointer; border: none; font-weight: 700; transition: opacity var(--t), transform var(--t); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 .miniterm__btn:hover { opacity: .85; transform: translateY(-1px); }
 .miniterm__btn--mail { background: var(--green); color: #111; }
+.miniterm__btn--dl { background: rgba(74,222,128,.15); color: var(--green); border: 1px solid var(--border-green); }
+.miniterm__btn--dl:hover { background: rgba(74,222,128,.28); color: #fff; }
 .miniterm__btn--close { background: #3a3a3a; color: #ccc; }
 .b { display: inline-block; width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
 .b.close { background: #ff5f57; } .b.min { background: #febc2e; } .b.max { background: #28c840; } .b:hover { filter: brightness(1.15); }

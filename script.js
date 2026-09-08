@@ -61,6 +61,7 @@ const certCardTitle   = document.getElementById('cert-card-title');
 const certIdDisplay   = document.getElementById('cert-id-display');
 const certOrgDisplay  = document.getElementById('cert-org-display');
 const certVerifyLink  = document.getElementById('cert-verify-link');
+const certDownloadBtn = document.getElementById('cert-download-btn');
 
 const interactiveTermModal = document.getElementById('interactive-term-modal');
 const intertermInput       = document.getElementById('interterm-input');
@@ -240,6 +241,17 @@ function initCertModalViewer () {
       if (certIdDisplay) certIdDisplay.textContent = id;
       if (certOrgDisplay) certOrgDisplay.textContent = issuer;
       if (certVerifyLink) certVerifyLink.href = link;
+
+      const file   = item.dataset.certFile;
+      if (certDownloadBtn) {
+        if (file) {
+          certDownloadBtn.href = file;
+          certDownloadBtn.download = name.replace(/[^a-zA-Z0-9_-]/g, '_') + '.pdf';
+          certDownloadBtn.hidden = false;
+        } else {
+          certDownloadBtn.hidden = true;
+        }
+      }
 
       if (certModal) certModal.hidden = false;
     });
