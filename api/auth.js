@@ -1,4 +1,4 @@
-import { configurationError, createSession, clearedSessionCookie, passwordMatches, sessionCookie, sessionIsValid } from '../lib/github.js';
+import { configurationError, createSession, clearedSessionCookie, missingConfiguration, passwordMatches, sessionCookie, sessionIsValid } from '../lib/github.js';
 
 function body(request) {
   return new Promise((resolve, reject) => {
@@ -18,7 +18,7 @@ export default async function handler(request, response) {
       response.setHeader('set-cookie', clearedSessionCookie());
       return response.status(200).json({ ok: true });
     }
-    if (configurationError()) return response.status(503).json({ error: 'Admin authentication is not configured' });
+    if (configurationError()) return response.status(503).json({ error: `Missing Vercel environment variables: ${missingConfiguration().join(', ')}` });
     const input = await body(request);
     if (!passwordMatches(input.password)) return response.status(401).json({ error: 'Invalid password' });
     response.setHeader('set-cookie', sessionCookie(createSession()));

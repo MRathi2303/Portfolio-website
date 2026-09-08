@@ -1165,8 +1165,12 @@ async function portfolioApi(path, options = {}) {
     headers: { 'content-type': 'application/json', ...(options.headers || {}) },
     ...options
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || 'Request failed');
+  const raw = await response.text();
+  let data = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch {
+    data = { error: raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() };
+  }
+  if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
   return data;
 }
 
