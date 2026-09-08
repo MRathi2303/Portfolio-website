@@ -24,7 +24,10 @@ Inspired by Linux terminal environments, window managers, and my daily work with
   - `sudo` — Authenticate and enter Admin Edit mode.
   - `help` & `clear` — Standard terminal utilities.
 - **Sudo Admin Mode (Live In-Browser Editing)**: Press `Ctrl + Alt + S` (or `Cmd + Alt + S`) to unlock inline content editing directly in the browser, with changes persisted to `localStorage`.
-- **Certificate Viewer Modal**: Clicking any certificate in the certifications list pops up an official terminal credential card showing issuer details, verification status, and credential IDs.
+- **Interactive Resume & Certificate Uploader (Zero Git Headache)**: Upload new resume PDFs or add certificates directly through the web UI using drag & drop:
+  - Saved immediately to browser storage (`IndexedDB`) with instant link updates.
+  - Optional **GitHub 1-Click Sync**: Direct browser-to-GitHub API integration that commits the new files to `main`, automatically triggering Vercel to redeploy live in ~20 seconds.
+- **Certificate Viewer Modal**: Clicking any certificate in the certifications list pops up an official terminal credential card showing issuer details, verification status, and credential IDs with direct download options.
 - **Simulated `wget` Resume Downloader**: Animates progress bar downloading my actual resume PDF (`Moon_Rathi_Resume.pdf`).
 - **No Heavy Frameworks**: Built with zero external UI libraries or heavy JS bundles — fast first paints, non-blocking fonts, and minimal memory footprint.
 

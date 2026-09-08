@@ -36,12 +36,135 @@
   <div class="sudo-bar" id="sudo-bar" hidden>
     <div class="sudo-bar__info">
       <span class="sudo-bar__badge">⚡ SUDO ADMIN MODE</span>
-      <span class="sudo-bar__hint">Click any text on the page to edit directly</span>
+      <span class="sudo-bar__hint">Click text to edit or use controls:</span>
     </div>
     <div class="sudo-bar__actions">
-      <button class="sudo-btn sudo-btn--save" id="sudo-save">💾 Save Changes</button>
-      <button class="sudo-btn sudo-btn--reset" id="sudo-reset">🔄 Reset Defaults</button>
-      <button class="sudo-btn sudo-btn--exit" id="sudo-exit">❌ Exit Sudo</button>
+      <button class="sudo-btn sudo-btn--upload" id="sudo-upload-resume-btn">📄 Update Resume</button>
+      <button class="sudo-btn sudo-btn--addcert" id="sudo-add-cert-btn">📜 Add Certificate</button>
+      <button class="sudo-btn sudo-btn--github" id="sudo-github-sync-btn">🐙 GitHub Sync</button>
+      <button class="sudo-btn sudo-btn--save" id="sudo-save">💾 Save Edits</button>
+      <button class="sudo-btn sudo-btn--reset" id="sudo-reset">🔄 Reset</button>
+      <button class="sudo-btn sudo-btn--exit" id="sudo-exit">❌ Exit</button>
+    </div>
+  </div>
+
+  <!-- ===================== RESUME UPLOAD MODAL ===================== -->
+  <div class="miniterm-overlay" id="resume-upload-modal" hidden>
+    <div class="miniterm sudo-upload-modal">
+      <header class="miniterm__bar">
+        <div class="miniterm__btns">
+          <span class="b close" id="resume-modal-close"></span>
+          <span class="b min"></span><span class="b max"></span>
+        </div>
+        <div class="miniterm__title">sudo asset_manager — update resume.pdf</div>
+      </header>
+      <div class="sudo-modal__body">
+        <div class="sudo-modal__msg">Select a new Resume PDF to update website &amp; download links:</div>
+        <div class="sudo-file-dropzone" id="resume-dropzone">
+          <input type="file" id="resume-file-input" accept="application/pdf" />
+          <div class="dropzone-hint">
+            <span style="font-size:1.6rem">📄</span><br/>
+            <b>Click to browse</b> or drag &amp; drop PDF file here<br/>
+            <span class="muted small">Replaces Moon_Rathi_Resume.pdf across all buttons</span>
+          </div>
+          <div class="dropzone-file-info" id="resume-file-info" hidden></div>
+        </div>
+        <div class="sudo-form-row">
+          <label class="sudo-checkbox-label">
+            <input type="checkbox" id="sync-resume-github" checked />
+            <span>Also commit directly to GitHub repository (auto-deploys to Vercel)</span>
+          </label>
+        </div>
+        <div class="sudo-modal__actions">
+          <button class="miniterm__btn miniterm__btn--mail" id="save-resume-btn" disabled>Apply &amp; Save Resume</button>
+          <button class="miniterm__btn miniterm__btn--close" id="resume-modal-cancel">Cancel</button>
+        </div>
+        <div class="sudo-status-msg" id="resume-upload-status" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CERTIFICATE ADD/EDIT MODAL ===================== -->
+  <div class="miniterm-overlay" id="cert-edit-modal" hidden>
+    <div class="miniterm sudo-cert-modal">
+      <header class="miniterm__bar">
+        <div class="miniterm__btns">
+          <span class="b close" id="cert-edit-modal-close"></span>
+          <span class="b min"></span><span class="b max"></span>
+        </div>
+        <div class="miniterm__title">sudo cert_manager — add new certificate</div>
+      </header>
+      <div class="sudo-modal__body">
+        <form id="cert-edit-form" onsubmit="return false;">
+          <div class="sudo-form-grid">
+            <div class="sudo-field sudo-field--full">
+              <label>Certificate Title *</label>
+              <input type="text" id="cert-input-title" placeholder="e.g. AWS Certified Solutions Architect" required />
+            </div>
+            <div class="sudo-field">
+              <label>Issuing Organization *</label>
+              <input type="text" id="cert-input-issuer" placeholder="e.g. Amazon Web Services, KodeKloud" required />
+            </div>
+            <div class="sudo-field">
+              <label>Issue Date</label>
+              <input type="text" id="cert-input-date" placeholder="e.g. October 2026" />
+            </div>
+            <div class="sudo-field">
+              <label>Credential ID</label>
+              <input type="text" id="cert-input-id" placeholder="e.g. AWS-PSA-99120" />
+            </div>
+            <div class="sudo-field">
+              <label>Icon Emoji</label>
+              <input type="text" id="cert-input-icon" value="📜" style="width:70px;text-align:center" />
+            </div>
+            <div class="sudo-field sudo-field--full">
+              <label>Online Verification URL</label>
+              <input type="url" id="cert-input-url" placeholder="https://aws.amazon.com/..." />
+            </div>
+            <div class="sudo-field sudo-field--full sudo-field--file">
+              <label>Upload Certificate Document (PDF or Image)</label>
+              <input type="file" id="cert-file-input" accept="application/pdf,image/*" />
+            </div>
+          </div>
+          <div class="sudo-form-row">
+            <label class="sudo-checkbox-label">
+              <input type="checkbox" id="sync-cert-github" checked />
+              <span>Also commit certificate file to GitHub repo (auto-deploys to Vercel)</span>
+            </label>
+          </div>
+          <div class="sudo-modal__actions">
+            <button type="submit" class="miniterm__btn miniterm__btn--mail" id="save-cert-btn">Save Certificate</button>
+            <button type="button" class="miniterm__btn miniterm__btn--close" id="cert-edit-cancel">Cancel</button>
+          </div>
+          <div class="sudo-status-msg" id="cert-upload-status" hidden></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== GITHUB TOKEN SETTINGS MODAL ===================== -->
+  <div class="miniterm-overlay" id="github-token-modal" hidden>
+    <div class="miniterm sudo-github-modal">
+      <header class="miniterm__bar">
+        <div class="miniterm__btns">
+          <span class="b close" id="github-modal-close"></span>
+          <span class="b min"></span><span class="b max"></span>
+        </div>
+        <div class="miniterm__title">sudo git_sync — GitHub 1-Click Live Deploy</div>
+      </header>
+      <div class="sudo-modal__body">
+        <div class="sudo-modal__msg">Configure GitHub Personal Access Token:</div>
+        <p class="small muted" style="line-height:1.6">
+          Enter a GitHub Personal Access Token (Fine-grained or classic with <code>repo</code> write permission). 
+          It is saved <b>only in your local browser</b>. With this token configured, clicking "Update Resume" or "Add Certificate" will directly commit to your repository on GitHub, triggering Vercel to redeploy globally in ~20 seconds!
+        </p>
+        <input type="password" id="github-pat-input" class="sudo-modal-pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx or github_pat_xxxx" />
+        <div class="sudo-modal__actions">
+          <button class="miniterm__btn miniterm__btn--mail" id="save-github-token-btn">Save &amp; Test Connection</button>
+          <button class="miniterm__btn miniterm__btn--close" id="github-modal-done">Close</button>
+        </div>
+        <div class="sudo-status-msg" id="github-token-status" hidden></div>
+      </div>
     </div>
   </div>
 

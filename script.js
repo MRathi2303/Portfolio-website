@@ -197,6 +197,9 @@ function revealDesktop () {
   initCertModalViewer();
   initHireSh();
   updateWgetTimestamp();
+  loadStoredResume();
+  loadStoredCerts();
+  initAssetManager();
 
   if (recoveryBoot) {
     enableSudoAdminMode();
@@ -779,4 +782,429 @@ function runResumeWget () {
       progressText.textContent = pct + '%';
     }
   }, 100);
+}
+
+/* ════════════════════════════════════════════════════
+   INTERACTIVE ASSET & CERTIFICATE MANAGER (SUDO)
+   - IndexedDB for instant client storage
+   - GitHub API sync for automatic live Vercel deployments
+════════════════════════════════════════════════════ */
+const GITHUB_REPO = 'MRathi2303/Portfolio-website';
+const GITHUB_TOKEN_KEY = 'moon_github_pat';
+
+function openAssetDB () {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('MoonPortfolioAssets', 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('assets')) {
+        db.createObjectStore('assets', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('custom_certs')) {
+        db.createObjectStore('custom_certs', { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSaveAsset (id, blob, filename) {
+  try {
+    const db = await openAssetDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('assets', 'readwrite');
+      tx.objectStore('assets').put({ id, blob, filename, time: Date.now() });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (err) {
+    console.error('IndexedDB save error:', err);
+  }
+}
+
+async function idbGetAsset (id) {
+  try {
+    const db = await openAssetDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('assets', 'readonly');
+      const req = tx.objectStore('assets').get(id);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('IndexedDB get error:', err);
+    return null;
+  }
+}
+
+async function idbSaveCert (cert) {
+  try {
+    const db = await openAssetDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('custom_certs', 'readwrite');
+      tx.objectStore('custom_certs').put(cert);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (err) {
+    console.error('IndexedDB cert save error:', err);
+  }
+}
+
+async function idbGetAllCerts () {
+  try {
+    const db = await openAssetDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('custom_certs', 'readonly');
+      const req = tx.objectStore('custom_certs').getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    return [];
+  }
+}
+
+function getGitHubToken () {
+  return localStorage.getItem(GITHUB_TOKEN_KEY) || '';
+}
+
+function setGitHubToken (token) {
+  localStorage.setItem(GITHUB_TOKEN_KEY, token.trim());
+}
+
+async function commitFileToGitHub (path, fileBlob, commitMsg) {
+  const token = getGitHubToken();
+  if (!token) throw new Error("No GitHub token configured. Click 'GitHub Sync' in Sudo Mode to configure.");
+
+  const base64Content = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result;
+      resolve(res.split(',')[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(fileBlob);
+  });
+
+  let existingSha = null;
+  try {
+    const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+    if (checkRes.ok) {
+      const fileData = await checkRes.json();
+      existingSha = fileData.sha;
+    }
+  } catch (err) {
+    // File may not exist yet
+  }
+
+  const bodyData = {
+    message: commitMsg,
+    content: base64Content
+  };
+  if (existingSha) bodyData.sha = existingSha;
+
+  const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(bodyData)
+  });
+
+  if (!putRes.ok) {
+    const errData = await putRes.json().catch(() => ({}));
+    throw new Error(errData.message || `GitHub commit failed (${putRes.status})`);
+  }
+
+  return await putRes.json();
+}
+
+async function loadStoredResume () {
+  const item = await idbGetAsset('resume');
+  if (item && item.blob) {
+    const blobUrl = URL.createObjectURL(item.blob);
+    const navCv = document.querySelector('.term__tabs-cv');
+    const dlBtn = document.getElementById('resume-dl-btn');
+    const filenameDisplay = document.getElementById('edit-resume-filename');
+
+    if (navCv) {
+      navCv.href = blobUrl;
+      navCv.download = item.filename || 'Moon_Rathi_Resume.pdf';
+    }
+    if (dlBtn) {
+      dlBtn.href = blobUrl;
+      dlBtn.download = item.filename || 'Moon_Rathi_Resume.pdf';
+    }
+    if (filenameDisplay) {
+      filenameDisplay.textContent = item.filename || 'Moon_Rathi_Resume.pdf';
+    }
+  }
+}
+
+async function loadStoredCerts () {
+  const certs = await idbGetAllCerts();
+  const list = document.querySelector('.certs--list');
+  if (!list || !certs.length) return;
+
+  certs.forEach(cert => {
+    if (document.getElementById(`cert-item-${cert.id}`)) return;
+
+    const div = document.createElement('div');
+    div.className = 'cert js-cert-item';
+    div.id = `cert-item-${cert.id}`;
+    div.dataset.certName = cert.name;
+    div.dataset.certIssuer = cert.issuer;
+    div.dataset.certDate = cert.date || '';
+    div.dataset.certId = cert.id;
+    div.dataset.certIcon = cert.icon || '📜';
+    div.dataset.certLink = cert.link || '#';
+    if (cert.fileBlob) {
+      div.dataset.certFile = URL.createObjectURL(cert.fileBlob);
+    }
+
+    div.innerHTML = `
+      <div class="cert__icon">${escapeHtml(cert.icon || '📜')}</div>
+      <div class="cert__info">
+        <span class="cert__name">${escapeHtml(cert.name)}</span>
+        <span class="cert__issuer">${escapeHtml(cert.issuer)} · ${escapeHtml(cert.date || '')}</span>
+      </div>
+      <span class="cert__view-hint">view certificate ↗</span>
+      <span class="cert__badge cert__badge--ok">verified ✓</span>
+    `;
+
+    list.appendChild(div);
+  });
+
+  initCertModalViewer();
+}
+
+function initAssetManager () {
+  const uploadResumeBtn   = document.getElementById('sudo-upload-resume-btn');
+  const addCertBtn         = document.getElementById('sudo-add-cert-btn');
+  const githubSyncBtn      = document.getElementById('sudo-github-sync-btn');
+
+  const resumeModal        = document.getElementById('resume-upload-modal');
+  const resumeModalClose   = document.getElementById('resume-modal-close');
+  const resumeModalCancel  = document.getElementById('resume-modal-cancel');
+  const resumeFileInput    = document.getElementById('resume-file-input');
+  const resumeDropzone     = document.getElementById('resume-dropzone');
+  const resumeFileInfo     = document.getElementById('resume-file-info');
+  const saveResumeBtn      = document.getElementById('save-resume-btn');
+  const syncResumeGithub   = document.getElementById('sync-resume-github');
+  const resumeStatus       = document.getElementById('resume-upload-status');
+
+  const certModalEl        = document.getElementById('cert-edit-modal');
+  const certModalClose     = document.getElementById('cert-edit-modal-close');
+  const certModalCancel    = document.getElementById('cert-edit-cancel');
+  const certForm           = document.getElementById('cert-edit-form');
+  const certStatus         = document.getElementById('cert-upload-status');
+
+  const gitModal           = document.getElementById('github-token-modal');
+  const gitModalClose      = document.getElementById('github-modal-close');
+  const gitModalDone       = document.getElementById('github-modal-done');
+  const gitTokenInput      = document.getElementById('github-pat-input');
+  const saveGitTokenBtn    = document.getElementById('save-github-token-btn');
+  const gitStatus          = document.getElementById('github-token-status');
+
+  let selectedResumeFile = null;
+
+  // 1. Resume Upload Handlers
+  if (uploadResumeBtn && resumeModal) {
+    uploadResumeBtn.addEventListener('click', () => {
+      resumeModal.hidden = false;
+      if (resumeStatus) resumeStatus.hidden = true;
+    });
+  }
+
+  const closeResumeModal = () => { if (resumeModal) resumeModal.hidden = true; };
+  if (resumeModalClose) resumeModalClose.addEventListener('click', closeResumeModal);
+  if (resumeModalCancel) resumeModalCancel.addEventListener('click', closeResumeModal);
+
+  if (resumeFileInput) {
+    resumeFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        selectedResumeFile = file;
+        const kb = (file.size / 1024).toFixed(1);
+        if (resumeFileInfo) {
+          resumeFileInfo.hidden = false;
+          resumeFileInfo.innerHTML = `✓ Selected: <b>${escapeHtml(file.name)}</b> (${kb} KB)`;
+        }
+        if (saveResumeBtn) saveResumeBtn.disabled = false;
+      }
+    });
+  }
+
+  if (saveResumeBtn) {
+    saveResumeBtn.addEventListener('click', async () => {
+      if (!selectedResumeFile) return;
+      saveResumeBtn.disabled = true;
+      saveResumeBtn.textContent = 'Saving...';
+
+      try {
+        await idbSaveAsset('resume', selectedResumeFile, selectedResumeFile.name);
+        await loadStoredResume();
+
+        let ghMsg = '';
+        if (syncResumeGithub && syncResumeGithub.checked && getGitHubToken()) {
+          try {
+            saveResumeBtn.textContent = 'Committing to GitHub...';
+            await commitFileToGitHub('Moon_Rathi_Resume.pdf', selectedResumeFile, 'Update resume via Sudo Admin Web Interface');
+            ghMsg = '<br>🚀 <b>Committed to GitHub!</b> Vercel will auto-redeploy your new resume in ~20 seconds.';
+          } catch (ghErr) {
+            ghMsg = `<br><span style="color:#ef4444">⚠️ GitHub Sync failed: ${escapeHtml(ghErr.message)}</span>`;
+          }
+        }
+
+        if (resumeStatus) {
+          resumeStatus.className = 'sudo-status-msg ok';
+          resumeStatus.hidden = false;
+          resumeStatus.innerHTML = `✓ Resume updated successfully! All website download buttons now serve this file.${ghMsg}`;
+        }
+        showToast('📄 Resume updated successfully!');
+        setTimeout(closeResumeModal, 2800);
+      } catch (err) {
+        if (resumeStatus) {
+          resumeStatus.className = 'sudo-status-msg err';
+          resumeStatus.hidden = false;
+          resumeStatus.textContent = 'Error: ' + err.message;
+        }
+      } finally {
+        saveResumeBtn.disabled = false;
+        saveResumeBtn.textContent = 'Apply & Save Resume';
+      }
+    });
+  }
+
+  // 2. Certificate Add/Edit Handlers
+  if (addCertBtn && certModalEl) {
+    addCertBtn.addEventListener('click', () => {
+      certModalEl.hidden = false;
+      if (certStatus) certStatus.hidden = true;
+    });
+  }
+
+  const closeCertModalEl = () => { if (certModalEl) certModalEl.hidden = true; };
+  if (certModalClose) certModalClose.addEventListener('click', closeCertModalEl);
+  if (certModalCancel) certModalCancel.addEventListener('click', closeCertModalEl);
+
+  if (certForm) {
+    certForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveCertBtn = document.getElementById('save-cert-btn');
+      if (saveCertBtn) saveCertBtn.disabled = true;
+
+      const title  = document.getElementById('cert-input-title').value.trim();
+      const issuer = document.getElementById('cert-input-issuer').value.trim();
+      const date   = document.getElementById('cert-input-date').value.trim();
+      const id     = document.getElementById('cert-input-id').value.trim() || 'CERT-' + Date.now();
+      const icon   = document.getElementById('cert-input-icon').value.trim() || '📜';
+      const url    = document.getElementById('cert-input-url').value.trim() || '#';
+      const fileIn = document.getElementById('cert-file-input');
+      const sync   = document.getElementById('sync-cert-github');
+
+      const certDoc = (fileIn && fileIn.files.length) ? fileIn.files[0] : null;
+
+      try {
+        const certObj = { id, name: title, issuer, date, icon, link: url, fileBlob: certDoc };
+        await idbSaveCert(certObj);
+        await loadStoredCerts();
+
+        let ghMsg = '';
+        if (certDoc && sync && sync.checked && getGitHubToken()) {
+          try {
+            const ext = certDoc.name.split('.').pop() || 'pdf';
+            const cleanPath = `certs/${id.toLowerCase()}.${ext}`;
+            await commitFileToGitHub(cleanPath, certDoc, `Add certificate: ${title}`);
+            ghMsg = '<br>🚀 <b>Certificate committed to GitHub!</b> Auto-deploying to Vercel.';
+          } catch (ghErr) {
+            ghMsg = `<br><span style="color:#ef4444">⚠️ GitHub Sync failed: ${escapeHtml(ghErr.message)}</span>`;
+          }
+        }
+
+        if (certStatus) {
+          certStatus.className = 'sudo-status-msg ok';
+          certStatus.hidden = false;
+          certStatus.innerHTML = `✓ Certificate "${escapeHtml(title)}" added to certifications list!${ghMsg}`;
+        }
+        showToast('📜 Certificate added to list!');
+        setTimeout(closeCertModalEl, 2400);
+      } catch (err) {
+        if (certStatus) {
+          certStatus.className = 'sudo-status-msg err';
+          certStatus.hidden = false;
+          certStatus.textContent = 'Error: ' + err.message;
+        }
+      } finally {
+        if (saveCertBtn) saveCertBtn.disabled = false;
+      }
+    });
+  }
+
+  // 3. GitHub Token Config Handlers
+  if (githubSyncBtn && gitModal) {
+    githubSyncBtn.addEventListener('click', () => {
+      gitModal.hidden = false;
+      if (gitTokenInput) gitTokenInput.value = getGitHubToken();
+      if (gitStatus) gitStatus.hidden = true;
+    });
+  }
+
+  const closeGitModal = () => { if (gitModal) gitModal.hidden = true; };
+  if (gitModalClose) gitModalClose.addEventListener('click', closeGitModal);
+  if (gitModalDone) gitModalDone.addEventListener('click', closeGitModal);
+
+  if (saveGitTokenBtn && gitTokenInput) {
+    saveGitTokenBtn.addEventListener('click', async () => {
+      const token = gitTokenInput.value.trim();
+      if (!token) {
+        setGitHubToken('');
+        if (gitStatus) {
+          gitStatus.className = 'sudo-status-msg ok';
+          gitStatus.hidden = false;
+          gitStatus.textContent = 'GitHub token cleared. Files will be saved in browser storage only.';
+        }
+        return;
+      }
+
+      saveGitTokenBtn.disabled = true;
+      saveGitTokenBtn.textContent = 'Testing Token...';
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json'
+          }
+        });
+        if (!res.ok) throw new Error('Repository write permission required or invalid token');
+
+        setGitHubToken(token);
+        if (gitStatus) {
+          gitStatus.className = 'sudo-status-msg ok';
+          gitStatus.hidden = false;
+          gitStatus.innerHTML = `✓ <b>Connected successfully to ${GITHUB_REPO}!</b><br>You can now upload resumes and certificates directly from the webpage.`;
+        }
+        showToast('🐙 GitHub connection verified!');
+      } catch (err) {
+        if (gitStatus) {
+          gitStatus.className = 'sudo-status-msg err';
+          gitStatus.hidden = false;
+          gitStatus.textContent = 'Failed: ' + err.message;
+        }
+      } finally {
+        saveGitTokenBtn.disabled = false;
+        saveGitTokenBtn.textContent = 'Save & Test Connection';
+      }
+    });
+  }
 }
