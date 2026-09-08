@@ -1,27 +1,19 @@
-# ==========================================
-# Production Dockerfile for blaze.portfolio
-# Base: Alpine Linux with Nginx (~15MB image)
-# ==========================================
-FROM nginx:alpine-slim
+FROM node:22-alpine
 
-# Remove default nginx static assets and config
-RUN rm -rf /usr/share/nginx/html/* /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV NODE_ENV=production
+ENV PORT=4173
 
-# Copy static website files
-COPY . /usr/share/nginx/html/
+COPY package.json ./
+COPY . .
 
-# Ensure proper permissions
-RUN chmod -R 755 /usr/share/nginx/html
+RUN mkdir -p /app/assets /app/certs \
+  && chmod -R 755 /app
 
-# Expose HTTP port
-EXPOSE 80
+EXPOSE 4173
 
-# Healthcheck to verify nginx server responsiveness
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1:4173/api/site || exit 1
 
-# Start nginx in foreground
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "local-server.js"]

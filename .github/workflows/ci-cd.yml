@@ -59,9 +59,10 @@ jobs:
 
       - name: Run Smoke Test on Container
         run: |
-          docker run -d -p 8080:80 --name test-portfolio moonrathi/portfolio-web:test
+          docker run -d -p 8080:4173 --name test-portfolio moonrathi/portfolio-web:test
           sleep 3
           curl -f http://localhost:8080/ || exit 1
+          curl -f http://localhost:8080/api/site || exit 1
           curl -f http://localhost:8080/Moon_Rathi_Resume.pdf || exit 1
           echo "Container HTTP smoke test: PASSED (200 OK)"
           docker stop test-portfolio

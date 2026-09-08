@@ -6,4 +6,5 @@ Dockerfile
 docker-compose.yml
 portfolio-fullstack
 *.log
+.env*
 README.md
