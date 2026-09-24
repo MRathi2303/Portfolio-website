@@ -121,6 +121,18 @@
       "icon": "📜",
       "sortOrder": 5,
       "isActive": true
+    },
+    {
+      "id": "a6d36bdd1abe47a4a58e6a33d0f1da1e",
+      "name": "AWS CLF-C02 Certified Cloud Practitioner",
+      "issuer": "Amazon Web Services",
+      "date": "September 2026",
+      "credentialId": "a6d36bdd1abe47a4a58e6a33d0f1da1e",
+      "credentialUrl": "https://www.credly.com/badges/9aaec6f0-8927-4c4f-ae01-1ec281e01905/public_url",
+      "icon": "📜",
+      "fileUrl": "/certs/a6d36bdd1abe47a4a58e6a33d0f1da1e.pdf",
+      "sortOrder": 6,
+      "isActive": true
     }
   ]
 }
